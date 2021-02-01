@@ -59,7 +59,7 @@
 // FW version and name
 #define FW_UPDATE_NAME                  "A:\\FW98515Z.bin"
 #define FW_VERSION_RELEASE              DISABLE //ENABLE
-#define FW_VERSION_NUM                  "REGULAR_1230_001"
+#define FW_VERSION_NUM                  "REGULAR_0201_001"
 
 //..............................................................................
 /**
@@ -956,4 +956,10 @@
 #define ETHCAM_TX_UPDATE_TEST         	ENABLE
 #define MOVIE_COMMPOOL_AUTO_SETTING		DISABLE
 
+//WDT function
+#define STARTWDT_FUNCTION       		DISABLE//ENABLE	
+#define SYSWDT_FUNC						ENABLE
+
+#define Ethcam_PIPTestFunc				ENABLE
+#define Auto_Reboot_PIP_TestFunc		DISABLE
 #endif //_PRJCFG_DVCAM_H_

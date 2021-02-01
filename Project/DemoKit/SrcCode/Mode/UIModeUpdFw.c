@@ -24,14 +24,15 @@ void ModeUpdFw_Close(void);
 void ModeUpdFw_Open(void)
 {
 	Ux_SetActiveApp(&UISetupObjCtrl);
-	Ux_SendEvent(0, NVTEVT_EXE_OPEN, 0);
+	//Ux_SendEvent(0, NVTEVT_EXE_OPEN, 0);
 	CHKPNT;
-	Ux_OpenWindow(&UIFlowWndWaitMomentCtrl, 1,UIFlowWndWaitMoment_StatusTXT_Msg_STRID_ETHCAM_UDFW_START);
+	//Ux_OpenWindow(&UIFlowWndWaitMomentCtrl, 1,UIFlowWndWaitMoment_StatusTXT_Msg_STRID_ETHCAM_UDFW_START);
 
 #if(UI_FUNC==ENABLE)
 	if (System_GetState(SYS_STATE_CURRSUBMODE) == SYS_SUBMODE_NORMAL) {
 		//Ux_OpenWindow((VControl *)(&UIUpdFwWndCtrl), 0);
 	} else {
+	CHKPNT;
 		SYS_SUBMODE *pCurSubMode = System_GetSubModeCtrl();
 		if (pCurSubMode && pCurSubMode->pfSubMode_OnOpen) {
 			pCurSubMode->pfSubMode_OnOpen();

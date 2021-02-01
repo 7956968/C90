@@ -3020,7 +3020,7 @@ void EthCam_RxGetLCAWrnRslt_CB(INT32 bEnd, void *output_data) //
 
 	AV_GetTXRslt(output->string,&LCA_Result);
 
-	//debug_msg("LCA_Result(%d,%d,%d)\r\n",LCA_Result.LWarnStatus,LCA_Result.MWarnStatus,LCA_Result.RWarnStatus);
+	debug_msg("LCA_Result(%d,%d,%d)\r\n",LCA_Result.LWarnStatus,LCA_Result.MWarnStatus,LCA_Result.RWarnStatus);
 	if(LCA_Result.LWarnStatus!=0 || LCA_Result.MWarnStatus!=0 || LCA_Result.RWarnStatus!=0)
 	Ux_PostEvent(NVTEVT_USER_LCA_RESULT, 3, LCA_Result.RWarnStatus,LCA_Result.MWarnStatus,LCA_Result.LWarnStatus);
 #endif

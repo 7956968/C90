@@ -10,7 +10,8 @@
 
 static BOOL  g_bGsensorOpened = FALSE;
 static PGSENSOR_OBJ  g_pGSensorObj = NULL;
-
+//int a
+//PGSENSOR_OBJ (*p)(void)   g_GetGSensorFunc[]
 static PGSENSOR_OBJ (*g_GetGSensorFunc[])(void) = {
 	GSensor_NONE_getGSensorObj,
 	GSensor_BMA253_getGSensorObj,

@@ -646,9 +646,9 @@ static void GPIOMap_LCDReset(void)
 #elif defined(_Disp_IFPA_LCD1_MD090TL01_)
 	gpio_clearPin(GPIO_CONVERT_IC_RESET);
 	SwTimer_DelayMs(10);
-	gpio_setPin(GPIO_CONVERT_IC_RESET);
-	SwTimer_DelayMs(10);
 	gpio_clearPin(GPIO_LCD_RESET);
+	SwTimer_DelayMs(10);
+	gpio_setPin(GPIO_CONVERT_IC_RESET);
 	SwTimer_DelayMs(10);
 	gpio_setPin(GPIO_LCD_RESET);
 	SwTimer_DelayMs(10);

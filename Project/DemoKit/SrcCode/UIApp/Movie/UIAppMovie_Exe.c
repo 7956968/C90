@@ -1736,10 +1736,9 @@ INT32 MovieExe_OnMoviePark(VControl *pCtrl, UINT32 paramNum, UINT32 *paramArray)
     UI_SetData(FL_MOVIE_PARK, uiSelect);  
 	if ( UI_GetData(FL_MOVIE_PARK) == MOVIE_PARK_OFF)
 	{
-		    GSensor_SetMovieParkSensitivity(0);
-
+	    GSensor_SetMovieParkSensitivity(0);
 	}else{
-    		GSensor_SetMovieParkSensitivity(uiSelect);
+		GSensor_SetMovieParkSensitivity(uiSelect);
 	}
 #endif
     return NVTEVT_CONSUME;
@@ -2733,15 +2732,12 @@ void MovieExe_SetIMECrop(UINT32 rec_id)
                    break;
 			}
 		#else
-			if(i == _CFG_REC_ID_1)
-			{  
+			if(i == _CFG_REC_ID_1){  
 			//CHKPNT;
 			  //DispIMEInfo.DispIMEWin.y = PipView_SetDispImgOnLcdStartY(SysGetFlag(FL_SENSOR1_DISP_OFFSET), DispIMEInfo.DispIMESize.h, DispIMEInfo.DispIMEWin.h);
 				DispIMEInfo.DispIMEWin.y =  SysGetFlag(FL_SENSOR1_DISP_OFFSET)*CurStepPosBehind; 
 			  debug_msg("^B RX Liwk------sensor 1 DispIMEInfo.DispIMEWin.y:%d %d\ %d %d %d\ %d\r\n",DispIMEInfo.DispIMEWin.y, DispIMEInfo.DispIMESize.h, DispIMEInfo.DispIMEWin.h,DispIMEInfo.DispIMESize.w,gMovie_Rec_Info[i].ratio.h,gMovie_Rec_Info[i].ratio.w);
-			}
-			else
-			{
+			}else{
 				CHKPNT;
 			  DispIMEInfo.DispIMEWin.y = ALIGN_CEIL_4((DispIMEInfo.DispIMESize.h - DispIMEInfo.DispIMEWin.h) / 2);
 			  debug_msg("^B RX Liwk------sensor 2 DispIMEInfo.DispIMEWin.y:%d\r\n",DispIMEInfo.DispIMEWin.y);
@@ -4356,6 +4352,7 @@ void MovieExe_EthCam_ChgDispCB(UINT32 DualCam)
 			MovieExe_EthCamDisp_ResetQ();
 			timer_pausePlay(g_EthCamDisp_TimerID, TIMER_STATE_PLAY);
 			#endif
+			CHKPNT;
 			ImageUnit_SetParam(ImageApp_MovieMulti_GetDispDataPort(_CFG_ETHCAM_ID_1), USERPROC_PARAM_PUSH_CALLBACK_IMM, (UINT32)MovieExe_EthCam_PIP_DispCB);
 #if(ETH_REARCAM_CAPS_COUNT >= 2)
 			ImageUnit_SetParam(ImageApp_MovieMulti_GetDispDataPort(_CFG_ETHCAM_ID_2), USERPROC_PARAM_PUSH_CALLBACK_IMM, (UINT32)NULL);
@@ -4396,6 +4393,7 @@ void MovieExe_EthCam_ChgDispCB(UINT32 DualCam)
 #if(ETH_REARCAM_CAPS_COUNT >= 2)
 		ImageUnit_SetParam(ImageApp_MovieMulti_GetDispDataPort(_CFG_ETHCAM_ID_2), USERPROC_PARAM_PUSH_CALLBACK_IMM, (UINT32)NULL);
 #endif
+		CHKPNT;
 		ImageUnit_SetParam(ImageApp_MovieMulti_GetDispDataPort(_CFG_REC_ID_1), USERPROC_PARAM_PUSH_CALLBACK_IMM, (UINT32)MovieExe_EthCam_PIP_DispCB);
 		ImageUnit_End();
 	}
@@ -4879,6 +4877,8 @@ if (UI_GetData(FL_MOVIE_HDR) == MOVIE_HDR_ON) {
 #if(defined(_NVT_ETHREARCAM_RX_))
 	//For PIP VIEW
 	UI_SetData(FL_DUAL_CAM, DUALCAM_FRONT);
+CHKPNT;
+
 	MovieExe_EthCam_ChgDispCB(UI_GetData(FL_DUAL_CAM));
 #endif
 	//#NT#2018/06/11#KCHong -begin
@@ -5327,10 +5327,16 @@ void CheckFileRecovery(void)
 	//CHKPNT;
 }
 #include "DxDisplay.h"
+extern BOOL bGetTxFirmware;
 INT32 MovieExe_OnOpen(VControl *pCtrl, UINT32 paramNum, UINT32 *paramArray)
 {
 CHKPNT;
 	//call default
+	
+	if(bflag_EthLinkFinish == FALSE ){
+		CHKPNT;
+		SetEthPowerOn();
+	}
 	Ux_DefaultEvent(pCtrl, NVTEVT_EXE_OPEN, paramNum, paramArray);
 
 	SxCmd_AddTable(uimovie);
@@ -5348,13 +5354,10 @@ CHKPNT;
 			bRecoveryOneTime = FALSE;
 			System_WaitFS();
 			GetLastFile_SN();
-		
 			CheckFileRecovery();
 		}
 	}
 	#endif
-	
-
 
 	if (MovieExe_InitCommonMem() < 0) {
 		return NVTEVT_CONSUME;
@@ -5451,7 +5454,7 @@ CHKPNT;
 	System_IPCSendReady();
 	return NVTEVT_CONSUME;
 }
-
+extern BOOL EthDisconRebooting;
 INT32 MovieExe_OnClose(VControl *pCtrl, UINT32 paramNum, UINT32 *paramArray)
 {
 //	UIPhotoFunc_Close();
@@ -5526,6 +5529,12 @@ INT32 MovieExe_OnClose(VControl *pCtrl, UINT32 paramNum, UINT32 *paramArray)
 	}
 	SxTimer_SetFuncActive(SX_TIMER_ETHCAM_LINKDET_ID, FALSE);
 	EthCamHB2 = 0;
+
+	if((bflag_EthLinkFinish == FALSE && bGetTxFirmware == FALSE && EthDisconRebooting)){
+		CHKPNT;
+		SetEthPowerOff();
+	}
+	
 #endif
 #if(defined(_NVT_ETHREARCAM_TX_))
 	EthCamTxHB = 0;

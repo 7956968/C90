@@ -39,6 +39,7 @@
 #include "UsbDevDef.h"
 #include "UIAppNetwork.h"
 #include "DrvExt.h"
+#include "wdt.h"
 
 ////////////////////////////////////////////////////////////////////////////////
 //---------------------UIInfo Debug Definition -----------------------------
@@ -702,7 +703,7 @@ void SysCheckFlag(void)
     SysLimitFlag(FL_ALARM_LCA,      0,  ALARM_LCA_ID_MAX,   DEFAULT_ALARM_LCA);
 //#MT#lyb -20200328 -end
 #if(_ANFA_ADAS_MENU_)
-    SysLimitFlag(FL_ANFA_ADAS,      0,  ANFA_ADAS_ID_MAX,   DEFAULT_ALARM_LCA);
+    SysLimitFlag(FL_ANFA_ADAS,      0,  ANFA_ADAS_ID_MAX,   DEFAULT_ANFA_ADAS);
 #endif
     SysLimitFlag(FL_BeepVolumnIndex,	0,  BEEP_VOL_SETTING_MAX,	DEFAULT_BeepVolumnIndex);
 
@@ -1336,6 +1337,9 @@ void System_UpdateFWReboot(void)
 	   if(result != FST_STA_OK)
 		 	return;
        debug_msg("Updated Done & Reboot!!\r\n");
+#if(STARTWDT_FUNCTION)
+		SysStopWDT();
+#endif
 	   GxSystem_HWResetNOW();
        Delay_DelayMs(2000);
     }

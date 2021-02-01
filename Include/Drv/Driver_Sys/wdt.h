@@ -119,6 +119,19 @@ extern UINT32   wdt_getResetNum(void);
 extern UINT32   wdt_getResetNum1(void);
 
 extern void     wdt_external_reset(void);
+#if(STARTWDT_FUNCTION==ENABLE)
+extern BOOL SysIsWDTWorking(void);
+extern void SysStartWDT(void);
+extern void SysStopWDT(void);
+extern void SysFeedWDT(void);
+extern void WDT_ResetSensorVDSignal_AECnt(void);
+extern void WDT_SensorVDSignal_Check(UINT32 overcnt);
+#endif
+#if (SYSWDT_FUNC  ==  ENABLE)
+extern void	Sys_Wdt_InstallID(void);
+extern BOOL Sys_Wdt_Open(void);
+extern BOOL Sys_Wdt_Close(void);
+#endif
 //@}
 
 #endif

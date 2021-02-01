@@ -1898,6 +1898,8 @@ void  System_OnStrg_TxFirmware(void)
 	   {CHKPNT;
 	     bGetTxFirmware = TRUE;
 		 DBGD(FileSys_GetFileLen(TxPathFW));
+	   }else{
+		bGetTxFirmware = FALSE;
 	   }
 	   FileSys_CloseFile(filehdl);
 	   index = FileSys_WaitFinish();

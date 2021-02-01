@@ -118,6 +118,7 @@ static UINT32 BackgroundEthCamEthLinkNotify(void);
 static UINT32 BackgroundEthCamIperfTest(void);
 static UINT32 BackgroundEthCamCheckPortReady(void);
 static UINT32 BackgroundEthCamUpdateUIInfo(void);
+static UINT32 BackgroundEthCamFWUpdate(void);
 #endif
 
 static UINT32 g_uiDpofOPMode = PLAYDPOF_SETONE;
@@ -221,6 +222,7 @@ BKG_JOB_ENTRY gBackgroundExtFuncTable[] = {
 	{NVTEVT_BKW_ETHCAM_IPERF_TEST,    BackgroundEthCamIperfTest},
 	{NVTEVT_BKW_ETHCAM_CHECKPORT_READY,    BackgroundEthCamCheckPortReady},
 	{NVTEVT_BKW_ETHCAM_UPDATE_UI,    BackgroundEthCamUpdateUIInfo},
+	{NVTEVT_BKW_ETHCAM_FW_UPDATE,	BackgroundEthCamFWUpdate},
 #endif
 
 	{0,                             0},
@@ -955,10 +957,6 @@ UINT32 BackgroundFormatCard(void)
 	Ux_PostEvent( NVTEVT_SYSTEM_MODE, 1, PRIMARY_MODE_MOVIE);
 CHKPNT;
 //#MT#lyb -20200413 -end
-
-
-
-
 	return (UINT32)ret;
 }
 UINT32 BackgroundFormatNand(void)
@@ -1829,6 +1827,61 @@ static UINT32 BackgroundEthCamUpdateUIInfo(void)
 #endif
 	return NVTRET_OK;
 }
+
+UINT32 g_EthcamFwSize = 0;
+UINT32 g_EthcamFwUpdateTimes = 0;//for waitmomentwindow update progressbar totail bar
+static UINT32 BackgroundEthCamFWUpdate(void)
+{
+	UINT32 uiFwAddr, uiFwSize;
+	FST_FILE hFile;
+	static char uiUpdateFWName[64] ="A:\\FW671_AA.bin" ;//"FW671_AA";// "A:\\EthcamTxFW.bin";
+	INT32 fst_er;
+	UINT32 EthCamCmdRET=0;
+	
+    BOOL bRet = NVTRET_OK;
+	
+	uiFwSize = (UINT32)FileSys_GetFileLen(uiUpdateFWName);
+	uiFwAddr = OS_GetMempoolAddr(POOL_ID_APP);
+
+	hFile = FileSys_OpenFile(uiUpdateFWName, FST_OPEN_READ);
+	if (hFile != 0) {
+		fst_er = FileSys_ReadFile(hFile, (UINT8 *)uiFwAddr, &uiFwSize, 0, NULL);
+		FileSys_CloseFile(hFile);
+		if (fst_er != FST_STA_OK) {
+			DBG_ERR("FW bin read fail\r\n");
+			UxState_SetData(&UIFlowWndWaitMoment_StatusTXT_MsgCtrl, STATE_CURITEM, UIFlowWndWaitMoment_StatusTXT_Msg_STRID_ETHCAM_FW_LOSTED);
+		
+			bRet = NVTRET_ERROR;
+            return bRet;
+		}
+	}
+	g_EthcamFwSize = uiFwSize;
+	DBGD(g_EthcamFwSize);
+	if(g_EthcamFwSize!=0){
+		CHKPNT;
+		g_EthcamFwUpdateTimes = g_EthcamFwSize * 2 / (2222428/28) ;	
+	}
+	DBGD(g_EthcamFwUpdateTimes);
+	
+	DBG_DUMP("Total FwSize=%d\r\n",uiFwSize);
+	EthCamSocketCli_SetCmdSendSizeCB(ETHCAM_PATH_ID_1, (UINT32)&socketCliEthCmd_SendSizeCB);
+	EthCam_SendXMLCmd(ETHCAM_PATH_ID_1, ETHCAM_PORT_DEFAULT ,ETHCAM_CMD_TX_FWUPDATE_FWSEND, uiFwSize);
+	EthCamCmdRET=EthCam_SendXMLData(ETHCAM_PATH_ID_1, (UINT8 *)uiFwAddr, uiFwSize);
+	EthCamSocketCli_SetCmdSendSizeCB(ETHCAM_PATH_ID_1, 0);	
+	
+	if(EthCamCmdRET==ETHCAM_RET_OK){
+        bRet = NVTRET_OK;
+		DBG_DUMP("Send FW update Start\r\n");
+		EthCam_SendXMLCmd(ETHCAM_PATH_ID_1, ETHCAM_PORT_DEFAULT ,ETHCAM_CMD_TX_FWUPDATE_START, 0);
+	}else{
+        bRet = NVTRET_ERROR;
+		DBG_ERR("FW send error, %d\r\n",EthCamCmdRET);
+	}
+	CHKPNT;
+	//UxState_SetData(&UIFlowWndWaitMoment_StatusTXT_MsgCtrl, STATE_CURITEM, UIFlowWndWaitMoment_StatusTXT_Msg_STRID_ETHCAM_UDFW_START);
+	return bRet;
+}
+
 
 extern ETHCAM_TX_SET_OFFESET SlideOffsetInfo;
 

@@ -735,7 +735,7 @@ CHKPNT;
 	if (g_UILCAAlarmTimerID == NULL_TIMER) {
 		g_UILCAAlarmTimerID = GxTimer_StartTimer(200, NVTEVT_LCA_ALARM_TIMER, CONTINUE);
 	}
-			UxCtrl_SetShow(&UIMenuWndWiFiMobileLinkOK_PlaybackModePanelCtrl,FALSE);
+	UxCtrl_SetShow(&UIMenuWndWiFiMobileLinkOK_PlaybackModePanelCtrl,FALSE);
   
 	Fun_WifiUpdateIcon(FALSE);
 	//#MT CJ 20200706 -END
@@ -767,7 +767,7 @@ CHKPNT;
 #endif
 //#NT#2016/03/23#Isiah Chang -end
 	WiFiCmd_MotionDetectStart();
-        UxState_SetData(&UIMenuWndWiFiMobileLinkOK_Status_RECtrl, STATE_CURITEM, UIMenuWndWiFiMobileLinkOK_Status_RE_ICON_REC_TRANSPAENT);
+    UxState_SetData(&UIMenuWndWiFiMobileLinkOK_Status_RECtrl, STATE_CURITEM, UIMenuWndWiFiMobileLinkOK_Status_RE_ICON_REC_TRANSPAENT);
 	UxCtrl_SetShow(&UIMenuWndWiFiMobileLinkOK_Status_RECtrl,  TRUE);
 
 	Ux_DefaultEvent(pCtrl, NVTEVT_OPEN_WINDOW, paramNum, paramArray);

@@ -37,7 +37,7 @@
 #include "DebugModule.h"
 ///////////////////////////////////////////////////////////////////////////////
 
-#define TBR_SIZE_RATIO  120//220//240
+#define TBR_SIZE_RATIO  100//220//240
 
 ETHCAM_SENDCMD_INFO sEthCamSendCmdInfo={0};
 
@@ -259,7 +259,7 @@ void socketEthData_Open(ETHSOCKIPC_ID id)
 		// open
 		EthsockIpcOpen[id].sharedSendMemAddr=socketEthData1_GetSendBufAddr((MovieExe_GetTBR(_CFG_REC_ID_1)*100/TBR_SIZE_RATIO));
 		EthsockIpcOpen[id].sharedSendMemSize=(MovieExe_GetTBR(_CFG_REC_ID_1)*100/TBR_SIZE_RATIO);
-		EthsockIpcOpen[id].sharedRecvMemAddr=OS_GetMempoolAddr(POOL_ID_ETHSOCK_IPC) ;
+		EthsockIpcOpen[id].sharedRecvMemAddr=OS_GetMempoolAddr(POOL_ID_ETHSOCK_IPC);
 		EthsockIpcOpen[id].sharedRecvMemSize=POOL_SIZE_ETHSOCK_IPC;
 
 		DBG_IND("D1 SendMemAddr=0x%x, RecvMemAddr=0x%x\r\n",EthsockIpcOpen[id].sharedSendMemAddr,EthsockIpcOpen[id].sharedRecvMemAddr);
@@ -762,6 +762,7 @@ void socketCliEthData_Open(ETHCAM_PATH_ID path_id, ETHSOCKIPCCLI_ID id)
 		EthsockCliIpcOpen[path_id][id].sharedSendMemSize=POOL_SIZE_ETHSOCKCLI_IPC;
 		if(sEthCamTxRecInfo[path_id].tbr!=0 && sEthCamTxDecInfo[path_id].bStarupOK==1){
 			//CHKPNT;
+			DBGD(sEthCamTxRecInfo[path_id].tbr);
 			g_SocketCliData1_RecvAddr[path_id]=socketCliEthData1_GetRecvBufAddr(path_id, (sEthCamTxRecInfo[path_id].tbr *100/TBR_SIZE_RATIO));
 			EthsockCliIpcOpen[path_id][id].sharedRecvMemSize=(sEthCamTxRecInfo[path_id].tbr*100/TBR_SIZE_RATIO);
 		}else{
@@ -1602,8 +1603,9 @@ void socketCliEthData2_NotifyCB(ETHCAM_PATH_ID path_id, int status, int parm)
 	case CYG_ETHSOCKETCLI_STATUS_CLIENT_SLOW: {
 			DBG_ERR("[%d]Error!!!parm=%d\r\n",path_id,parm);
 			if(path_id>=ETHCAM_PATH_ID_1 && path_id< ETHCAM_PATH_ID_MAX){
-				//EthCam_SendXMLCmd(path_id, ETHCAM_PORT_DEFAULT ,ETHCAM_CMD_DUMP_TX_BS_INFO, 0);
+				EthCam_SendXMLCmd(path_id, ETHCAM_PORT_DEFAULT ,ETHCAM_CMD_DUMP_TX_BS_INFO, 0);
 			}
+			bflag_EthLinkFinish = FALSE; //zjf 21-1-26
 			break;
 		}
 	}
@@ -2032,16 +2034,20 @@ void socketCliEthCmd_NotifyCB(ETHCAM_PATH_ID path_id, int status, int parm)
 }
 #if(defined(_NVT_ETHREARCAM_RX_))
 #include "UIFlow.h"
+INT8 ethsocket_sendsize;
 void socketCliEthCmd_SendSizeCB(int size, int total_size)
 {
+	ethsocket_sendsize = size*100/total_size;
 	DBG_IND("%d, %d, Send %d Percent\r\n",size ,total_size ,size*100/total_size);
 	if (System_GetState(SYS_STATE_NEXTSUBMODE) == SYS_SUBMODE_UPDFW
 		&& System_GetState(SYS_STATE_CURRSUBMODE)  == SYS_SUBMODE_UPDFW) {
 		static char g_StringTmpBuf[64] = {0};
 	    	snprintf(g_StringTmpBuf, sizeof(g_StringTmpBuf), "Send FW to Tx: %d",size*100/total_size);
 			//---zjf cancel
+			//CHKPNT;
 	    	//UxState_SetItemData(&UIFlowWndWaitMoment_StatusTXT_MsgCtrl, 0, STATE_ITEM_STRID,  Txt_Pointer(g_StringTmpBuf));
-	}
+			//UxCtrl_SetShow(&UIFlowWndWaitMoment_StatusTXT_MsgCtrl, TRUE);
+		}
 }
 BOOL socketCliEthCmd_IsConn(ETHCAM_PATH_ID path_id)
 {

@@ -227,8 +227,6 @@ INT32 UIMenuWndSetupFormatConfirm_BTN_OK_OnTouchPanelClick(VControl *pCtrl, UINT
         }
         Ux_OpenWindow(&UIFlowWndWaitMomentCtrl, 2, UIFlowWndWaitMoment_StatusTXT_Msg_STRID_PLEASE_WAIT, FLOWWRNMSG_TIMER_5SEC);
    
- 
-
         BKG_PostEvent(NVTEVT_BKW_FORMAT_CARD);
         // reset file ID
         #if USE_FILEDB//----lyb mask, FORMAT_CARD      has done it. // 20200430 cj open 

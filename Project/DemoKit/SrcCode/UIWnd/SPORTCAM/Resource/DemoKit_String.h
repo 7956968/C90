@@ -647,5 +647,8 @@ unsigned char gDemoKit_String_RU[];
 #define STRDI_ADAS_TSR_ON                        0x024E
 #define STRID_ENTER_SHUTDOWN                     0x024F
 #define STRID_SLOW_CARD                          0x0250
+#define STRID_ETHCAM_FW_LOSTED                   0x0251
+#define STRID_ETHCAM_UPDATE_FAILED               0x0252
+#define STRID_ETHCAM_SENDFW_FAILED               0x0253
 
 #endif //_DEMOKIT_STRING_H_

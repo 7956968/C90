@@ -25,6 +25,9 @@ typedef enum
 	UIFlowWndWaitMoment_StatusTXT_Msg_STRID_ENTER_SHUTDOWN,
 	UIFlowWndWaitMoment_StatusTXT_Msg_STRID_ETHCAM_CHANGE_FRONTCAM,
 	UIFlowWndWaitMoment_StatusTXT_Msg_STRID_SLOW_CARD,
+	UIFlowWndWaitMoment_StatusTXT_Msg_STRID_ETHCAM_FW_LOSTED,
+	UIFlowWndWaitMoment_StatusTXT_Msg_STRID_ETHCAM_UPDATE_FAILED,
+	UIFlowWndWaitMoment_StatusTXT_Msg_STRID_ETHCAM_SENDFW_FAILED,
 	UIFlowWndWaitMoment_StatusTXT_Msg_MAX
 } UIFlowWndWaitMoment_StatusTXT_Msg_Setting;
 
@@ -32,5 +35,6 @@ extern VControl UIFlowWndWaitMomentButtonNoCtrl;//Button type
 
 extern VControl UIFlowWndWaitMomentButtonYesCtrl;//Button type 
 
+extern VControl UIFlowWndWaitMoment_ProgressBarCtrl;//ProgressBar type 
 //---------------------UIFlowWndWaitMomentCtrl User Export---------------------------
 #endif

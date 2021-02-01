@@ -468,9 +468,7 @@ BOOL  GetGensorInterruptData(UINT32 *uGsensorX, UINT32 *uGsensorY, UINT32 *uGsen
             }
         }
         ShowCnt++;
-    }
-    else
-    {
+    }else{
         static UINT32 ShowCnt;
         if ( (ShowCnt%10) == 0 && ShowCnt >= 5)
         {
@@ -495,11 +493,11 @@ BOOL  GetGensorInterruptData(UINT32 *uGsensorX, UINT32 *uGsensorY, UINT32 *uGsen
         b_is_first = 1;
     }
 
-    thre =  GSensor_DA380_GetSensitivityLevel();
+    thre = GSensor_DA380_GetSensitivityLevel();
 
     if( abs(ucGx - prev_x) > thre
         ||abs(ucGY- prev_y) > thre
-        ||abs(ucGZ- prev_z) > thre )
+        ||abs(ucGZ- prev_z) > thre)
     	{
         	GSState = 1;
     		prev_x = ucGx;

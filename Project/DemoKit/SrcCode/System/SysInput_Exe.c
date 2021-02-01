@@ -44,6 +44,11 @@
 #include "rtc.h"
 #include "DxDisplay.h"
 #include "DxCommon.h"
+#include "DxPower.h"
+#if(STARTWDT_FUNCTION==ENABLE)
+#include "wdt.h"
+#endif
+
 //#NT#Refine code for continue key
 #define    BURSTKEY_DEBOUNCE     800//ms
 #define    BURSTKEY_INTERVAL     200//ms
@@ -777,13 +782,12 @@ void UI_DetCustom1Key(void)
         debug_msg("Gsensor Triggered!!\r\n");
         iCustom1FilterCount = 0;
         if(!System_GetGsensorPwrOn())
-		if ( 	UI_GetData(FL_MOVIE_CYCLIC_REC) == MOVIE_CYCLICREC_OFF)
+		if (UI_GetData(FL_MOVIE_CYCLIC_REC) == MOVIE_CYCLICREC_OFF)
 		{
-			        debug_msg("Gsensor off, do nothing!!\r\n");
-
+	        debug_msg("Gsensor off, do nothing!!\r\n");
 		}else
 		{
-            		Ux_PostEvent(NVTEVT_KEY_CUSTOM1, 1, NVTEVT_KEY_PRESS);
+            Ux_PostEvent(NVTEVT_KEY_CUSTOM1, 1, NVTEVT_KEY_PRESS);
 		}
     }
 
@@ -1412,8 +1416,10 @@ char         gev_cMovieStampStr[13][256] = {0};
 char         g_EVMovieStampStr[13][256];
 BOOL isOpenMsgWin = FALSE;
 extern BOOL g_EnterParkingMode_CloseBL;
+static BOOL g_WDTStatus = FALSE;
 void UI_DetUserFunc(void)
 {
+	
 	
     System_DecParkPwroffTimeCount();
 
@@ -1442,10 +1448,8 @@ void UI_DetUserFunc(void)
 				{
 					Ux_PostEvent(NVTEVT_KEY_SHUTTER2, 1, NVTEVT_KEY_PRESS);
 					Delay_DelayMs(500);
-
 				}
 				Ux_PostEvent(NVTEVT_KEY_POWER_REL, 1, NVTEVT_KEY_RELEASE);
-
 			}
 			NOACCCount++;
 		}
@@ -1504,11 +1508,9 @@ void UI_DetUserFunc(void)
                 	Ux_PostEvent(NVTEVT_KEY_POWER_REL, 1, NVTEVT_KEY_RELEASE);
                 }
             }
-
         }
-    }
-    else // if ACC On, Cancel Park poweroff time count;
-    {   
+    }else{  // if ACC On, Cancel Park poweroff time count;
+      
     	if(isOpenMsgWin == TRUE)
     	{
 			isOpenMsgWin = FALSE;
@@ -1538,6 +1540,11 @@ void UI_DetUserFunc(void)
 			//((DX_OBJECT *)cDispDev)->pfState(DXSET|DRVDISP_STATE_BACKLIGHT, DRVDISP_BACKLIGHT_ON);
         }
     }
+
+	
+#if(STARTWDT_FUNCTION==ENABLE)
+	SysFeedWDT();
+#endif
     
 }
 

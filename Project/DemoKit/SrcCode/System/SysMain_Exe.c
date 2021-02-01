@@ -247,6 +247,11 @@ INT32 System_OnBoot(VControl *pCtrl, UINT32 paramNum, UINT32 *paramArray)
 		UctrlMain_Init();
 #endif
 
+#if (SYSWDT_FUNC  ==  ENABLE)
+		Sys_Wdt_Open();
+#endif
+
+
 //debug_msg("--cj %d %d %d ",System_GetState(SYS_STATE_POWERON), System_OnStrgInit_EMBMEM_GetGxStrgType(),GxStrg_GetDeviceCtrl(0, CARD_INSERT)
 //			);
 		//wait fs init finish
@@ -387,7 +392,7 @@ INT32 System_OnBoot(VControl *pCtrl, UINT32 paramNum, UINT32 *paramArray)
 #endif
 			
 
-			System_UpdateFWReboot();
+	System_UpdateFWReboot();
 #if (AUDIO_FUNC == ENABLE )  
 	static BOOL  fristIn = TRUE;  
 	if ( fristIn) 
@@ -476,8 +481,9 @@ INT32 System_OnShutdown(VControl *pCtrl, UINT32 paramNum, UINT32 *paramArray)
 //#MT#lyb -20200403 -begin
     GSensor_ParkingMode();
 //#MT#lyb -20200403 -end
-
-
+#if(STARTWDT_FUNCTION)
+	SysStopWDT();
+#endif
 
 	//#NT#2019/10/30#Philex Lin - begin
 	// fixed bug for can't stopping wifi station re-connect timer during shutdown
@@ -520,6 +526,9 @@ INT32 System_OnShutdown(VControl *pCtrl, UINT32 paramNum, UINT32 *paramArray)
 //fristIn = TRUE;
  GxSound_WaitStop(); //wait for poweroff sound completed
  
+#if (SYSWDT_FUNC  ==  ENABLE)
+	 Sys_Wdt_Close();
+#endif
    GxSystem_ShutdownNOW();
    while(1);
 //#MT#lyb -20200410 -end

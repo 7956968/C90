@@ -72,11 +72,16 @@ MODELEXT_HEADER ind_gpio_info_header __attribute__((section("modelext_header.gpi
 void SetEthPowerOn(void);
 void SetEthPowerOn(void)
 {
-		gpio_setDir(GPIO_ETH_PWR, GPIO_DIR_OUTPUT);
-
-	gpio_setPin(GPIO_ETH_PWR);	
-		
+	gpio_setDir(GPIO_ETH_PWR, GPIO_DIR_OUTPUT);
+	gpio_setPin(GPIO_ETH_PWR);			
 }
+void SetEthPowerOff(void);
+void SetEthPowerOff(void)
+{
+	gpio_setDir(GPIO_ETH_PWR, GPIO_DIR_OUTPUT);
+	gpio_clearPin(GPIO_ETH_PWR);		
+}
+
 
 void SetBLStatus(BOOL status );
 

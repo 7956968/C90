@@ -100,6 +100,7 @@ static void sen_power_ctrl_gc2053m(SENSOR_ID id, POW_CTRL_FLAG flag)
 		Delay_DelayMs(10);
 		gpio_setPin(GPIO_SENSOR_RESET);
 		Delay_DelayMs(2);
+		pad_setDrivingSink(PAD_DS_SGPIO0, PAD_DRIVINGSINK_16MA);
 		break;
 
 	case POW_CTRL_TURN_OFF:

@@ -1,9 +1,15 @@
+1-22
+优化后路通信失败的图标显示和重连机制			失败先等待几秒看能否再次成功连接上通信
+加上看门狗					STARTWDT_FUNCTION
+优化后方来车报警逻辑				临界问题 (65535-threhold , 0+threhold)
+1-20
+加入升级进度条提示
 12-30
 光圈值改为25
 12-22
-背光调节默认开						DEFAULT_MOVIE_BACKADJUST
+背光调节默认开					DEFAULT_MOVIE_BACKADJUST
 12-21
-暂时屏蔽后方来车报警功能			菜单位置起始265，commonitem.c中 PAGE=10 commonitemres.c注释LCA部分，item改为5
+暂时屏蔽后方来车报警功能				菜单位置起始265，commonitem.c中 PAGE=10 commonitemres.c注释LCA部分，item改为5
 
 12-18
 关闭TMNR测试

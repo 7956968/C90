@@ -498,8 +498,6 @@ static BOOL Cmd_ethcam_tx_fwupdate(CHAR *strCmd)
 	INT32 fst_er;
 	UINT32 EthCamCmdRET[ETH_REARCAM_CAPS_COUNT]={0};
 
-	Ux_OpenWindow(&UIFlowWndWaitMomentCtrl, 1, UIFlowWndWaitMoment_StatusTXT_Msg_STRID_ETHCAM_UDFW_SENDFW);
-
 	UINT32 i;
 	for (i=0; i<ETH_REARCAM_CAPS_COUNT; i++){
 
@@ -527,7 +525,6 @@ static BOOL Cmd_ethcam_tx_fwupdate(CHAR *strCmd)
 				}
 			}
 			DBG_DUMP("Total FwSize=%d\r\n",uiFwSize);
-
 			EthCamSocketCli_SetCmdSendSizeCB(ETHCAM_PATH_ID_1+i, (UINT32)&socketCliEthCmd_SendSizeCB);
 			EthCam_SendXMLCmd(ETHCAM_PATH_ID_1+i, ETHCAM_PORT_DEFAULT ,ETHCAM_CMD_TX_FWUPDATE_FWSEND, uiFwSize);
 			EthCamCmdRET[i]=EthCam_SendXMLData(ETHCAM_PATH_ID_1+i, (UINT8 *)uiFwAddr, uiFwSize);
@@ -546,8 +543,10 @@ static BOOL Cmd_ethcam_tx_fwupdate(CHAR *strCmd)
 			}
 		}
 	}
-
+	
+	CHKPNT;
 	Ux_CloseWindow(&UIFlowWndWaitMomentCtrl, 0);
+	CHKPNT;
 	Ux_OpenWindow(&UIFlowWndWaitMomentCtrl, 1, UIFlowWndWaitMoment_StatusTXT_Msg_STRID_ETHCAM_UDFW_START);
 
 	return TRUE;

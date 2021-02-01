@@ -57,7 +57,6 @@ extern BOOL bSysLogfile;
 //#define __DBGLVL__ 2        //TRACE mode, show err, wrn, ind, msg and func and ind, msg and func can be filtering by __DBGFLT__ settings
 #define __DBGFLT__ "*"      // *=All
 #include "DebugModule.h"
-
 //#NT#2016/09/29#KCHong -begin
 //#NT#The GPS related variables should not depend on ADAS.
 #if (GPS_FUNCTION == ENABLE)
@@ -236,7 +235,6 @@ EVENT_END
 // Movie mode key mask
 #define MOVIE_KEY_PRESS_MASK        (FLGKEY_SHUTTER2|FLGKEY_RIGHT|FLGKEY_LEFT|FLGKEY_CUSTOM1|FLGKEY_UP|FLGKEY_DOWN)
 #define MOVIE_KEY_RELEASE_MASK      (FLGKEY_SHUTTER2|FLGKEY_RIGHT|FLGKEY_LEFT|FLGKEY_CUSTOM1|FLGKEY_UP|FLGKEY_DOWN)
-
 //-----------------------------------------------------------------------------------------
 static BOOL    g_uiRecordIngMotionDet = TRUE;
 #if (_ADAS_FUNC_ == ENABLE)
@@ -268,6 +266,7 @@ static UINT32 g_uiRecStopTimerCnt     = 0;
 BOOL isEnterParkingMode =FALSE;
 BOOL  FocusOperate = FALSE;
 UINT32 FocusOperateCount = 0;
+UINT8 EthDisconRebootcnt = 0;
 
 extern  BOOL  PlayMenu_Close;
 static BOOL isStopREC = FALSE;
@@ -870,10 +869,18 @@ static BOOL  UIFlowMovie_CheckSDStatus(void)
 
 static BOOL  bDetEthcamUpdate = FALSE;
 UINT32 bDetEthcamUpdateCount = 0;
+#if(Ethcam_PIPTestFunc == ENABLE)
+	BOOL Ethcam_PipTest = FALSE;
+	UINT8 Ethcam_PipTestCnt = 0;
+#endif
+#if(Auto_Reboot_PIP_TestFunc == ENABLE)
+	BOOL Ethcam_Reboot_PipTest = FALSE;
+#endif
 INT32 UIFlowWndMovie_OnOpen(VControl *pCtrl, UINT32 paramNum, UINT32 *paramArray)
 {
 
 debug_msg("--------------UIFlowWndMovie_OnOpen CJ --------------%d \r\n" ,UI_GetData( FL_MOVIE_SIZE ));
+
 	g_uiRecStopTimerCnt=0;
 	//#NT#2016/03/07#KCHong -begin
 	//#NT#Low power timelapse function, do not show OSD if boot from alarm
@@ -909,6 +916,9 @@ debug_msg("--------------UIFlowWndMovie_OnOpen CJ --------------%d \r\n" ,UI_Get
 //MUST open before UIFlowWndMovie_Initparam, because Initparam call GSensor_SetSensitivity.
 	GSensor_open();
 #endif
+
+	//System_OnStrg_TxFirmware();//check again
+	
 	UIFlowWndMovie_Initparam();
 	debug_msg( "--cj SYS_STATE_POWERON:%d %d \r\n",System_GetState(SYS_STATE_POWERON), UIStorageCheck(STORAGE_CHECK_ERROR, NULL));
 	if (System_GetState(SYS_STATE_POWERON) == SYSTEM_POWERON_SAFE) {				
@@ -984,21 +994,52 @@ FlowMovie_IconHideBackLightLvl_Panel();
 	UI_Show(UI_SHOW_BACKGND, TRUE);
 #endif
 #if(LOGFILE_FUNC == DISABLE)
-if  ( UIFlowMovie_CheckSDStatus()){
-			CHKPNT;
-			//SDStatus = FALSE;
-				return NVTEVT_CONSUME;
+	if( UIFlowMovie_CheckSDStatus()){
+		CHKPNT;
+		//SDStatus = FALSE;
+		return NVTEVT_CONSUME;
 	}
 #endif
+#if(Ethcam_PIPTestFunc == ENABLE)
+
+	FST_FILE ethcam_filehdl;
+	static char ethcam_filename[64] ="A:\\C90_ChangePIP.txt" ;//"FW671_AA";// "A:\\EthcamTxFW.bin";
+	
+	ethcam_filehdl = FileSys_OpenFile(ethcam_filename,FST_OPEN_READ);
+	
+	 if(ethcam_filehdl)
+	 {
+		Ethcam_PipTest = TRUE;
+		FileSys_CloseFile(ethcam_filehdl);
+	 }
+#endif
+
+#if(Auto_Reboot_PIP_TestFunc == ENABLE)
+	FST_FILE ethcam_Reboot_filehdl;
+	static char ethcam_Reboot_filename[64] ="A:\\C90_RebootPIP.txt" ;//"FW671_AA";// "A:\\EthcamTxFW.bin";
+
+	ethcam_Reboot_filehdl = FileSys_OpenFile(ethcam_Reboot_filename,FST_OPEN_READ);
+
+	 if(ethcam_Reboot_filehdl)
+	 {
+		Ethcam_Reboot_PipTest = TRUE;
+		FileSys_CloseFile(ethcam_Reboot_filehdl);
+	 }
+	
+#endif
+
 	// update g_uiRecordIngMotionDet flag
 	if (gUIMotionDetTimerID == NULL_TIMER) {
 		gUIMotionDetTimerID = GxTimer_StartTimer(TIMER_HALF_SEC, NVTEVT_05SEC_TIMER, CONTINUE);
+		debug_msg("movie NVTEVT_05SEC_TIMER open\r\n");
 	}
 	if (g_uiDateTimerID == NULL_TIMER) {
 		g_uiDateTimerID = GxTimer_StartTimer(TIMER_ONE_SEC, NVTEVT_1SEC_TIMER, CONTINUE);
+		debug_msg("movie NVTEVT_1SEC_TIMER open\r\n");
 	}
 	if (g_UILCAAlarmTimerID == NULL_TIMER) {
 		g_UILCAAlarmTimerID = GxTimer_StartTimer(TIMER_LCA_SEC, NVTEVT_LCA_ALARM_TIMER, CONTINUE);
+		debug_msg("movie NVTEVT_LCA_ALARM_TIMER open\r\n");
 	}
 
 	bChangeModeAutoRec = FALSE;
@@ -1775,20 +1816,21 @@ static void Fun_UpdateRecIcon(void)
 			}
 
 	//������ʾ �ͷֱ���   
-		 if( ( EthCamNet_GetEthLinkStatus(0) == ETHCAM_LINK_UP &&socketCliEthData1_IsRecv(ETHCAM_PATH_ID_1 ) )  && bflag_EthLinkFinish )
+		 if( ( EthCamNet_GetEthLinkStatus(0) == ETHCAM_LINK_UP && (EthDisconRebootcnt <= 3)))
+		 	//socketCliEthData1_IsRecv(ETHCAM_PATH_ID_1 ) )  && bflag_EthLinkFinish )
 		 { 
-		 	if ( bflag_EthLinkFinish ) {
-				UxState_SetData(&UIFlowWndMovie_StatusTextCtrl, STATE_CURITEM, UIFlowWndMovie_StatusText_STRID_DUAL_1920P30);
-				UxState_SetData(& UIFlowWndMovie_Status_Movie_BCtrl, STATE_CURITEM, UIFlowWndMovie_Status_Movie_B_ICON_TOP_BACK);
-		 	}
-		 }else if(EthCamNet_GetEthLinkStatus(0) == ETHCAM_LINK_DOWN || bflag_EthLinkFinish == FALSE || (!socketCliEthData1_IsRecv(ETHCAM_PATH_ID_1 ) ) )
-		 {
-		 	if ( bflag_EthLinkFinish == FALSE ) {
-		 		
-				UxState_SetData(&UIFlowWndMovie_StatusTextCtrl, STATE_CURITEM, UIFlowWndMovie_StatusText_STRID_1920P30);
-				UxState_SetData(& UIFlowWndMovie_Status_Movie_BCtrl, STATE_CURITEM, UIFlowWndMovie_Status_Movie_B_ICON_TOP_BACK_OFF);
-		 	}
+		 	//CHKPNT;
+			UxState_SetData(&UIFlowWndMovie_StatusTextCtrl, STATE_CURITEM, UIFlowWndMovie_StatusText_STRID_DUAL_1920P30);
+			UxState_SetData(& UIFlowWndMovie_Status_Movie_BCtrl, STATE_CURITEM, UIFlowWndMovie_Status_Movie_B_ICON_TOP_BACK);
 		 }
+		 /* move to movie_ontimer func halftime 
+		 else if(EthCamNet_GetEthLinkStatus(0) == ETHCAM_LINK_DOWN || (EthDisconRebootcnt > 3))
+		 //bflag_EthLinkFinish == FALSE || (!socketCliEthData1_IsRecv(ETHCAM_PATH_ID_1 ) ) )
+		 {
+			//CHKPNT;
+			UxState_SetData(&UIFlowWndMovie_StatusTextCtrl, STATE_CURITEM, UIFlowWndMovie_StatusText_STRID_1920P30);
+			UxState_SetData(& UIFlowWndMovie_Status_Movie_BCtrl, STATE_CURITEM, UIFlowWndMovie_Status_Movie_B_ICON_TOP_BACK_OFF);
+		 }*/
 	 
 			//FlowMovie_IconHideMaxRecTime(&UIFlowWndMovie_Static_maxtimeCtrl);
 			//cancle this function cj 0702
@@ -2133,9 +2175,10 @@ CHKPNT;
 	EthCam_SendXMLCmd(ETHCAM_PATH_ID_1, ETHCAM_PORT_DATA2 ,ETHCAM_CMD_TX_STREAM_STOP, 0);
 #endif
 	Delay_DelayMs(500);  
+
 	System_ChangeSubMode(SYS_SUBMODE_UPDFW);
 	Ux_SendEvent(0, NVTEVT_SYSTEM_MODE, 1, PRIMARY_MODE_UPDFW);
-
+	
 	uiFwSize = (UINT32)FileSys_GetFileLen(uiUpdateFWName);
 	uiFwAddr = OS_GetMempoolAddr(POOL_ID_APP);
 
@@ -2151,11 +2194,13 @@ CHKPNT;
 		}
 	}
 	DBG_DUMP("Total FwSize=%d\r\n",uiFwSize);
+	
 
 	EthCamSocketCli_SetCmdSendSizeCB(ETHCAM_PATH_ID_1, (UINT32)&socketCliEthCmd_SendSizeCB);
 	EthCam_SendXMLCmd(ETHCAM_PATH_ID_1, ETHCAM_PORT_DEFAULT ,ETHCAM_CMD_TX_FWUPDATE_FWSEND, uiFwSize);
 	EthCamCmdRET=EthCam_SendXMLData(ETHCAM_PATH_ID_1, (UINT8 *)uiFwAddr, uiFwSize);
 	EthCamSocketCli_SetCmdSendSizeCB(ETHCAM_PATH_ID_1, 0);
+	/*
 
 	if(EthCamCmdRET==ETHCAM_RET_OK){
         bRet = TRUE;
@@ -2165,7 +2210,9 @@ CHKPNT;
         bRet = FALSE;
 		DBG_ERR("FW send error, %d\r\n",EthCamCmdRET);
 	}
+
 	Ux_CloseWindow(&UIFlowWndWaitMomentCtrl, 0);//0616
+	*/
 	//Ux_OpenWindow(&UIFlowWndWaitMomentCtrl, 1, UIFlowWndWaitMoment_StatusTXT_Msg_STRID_ETHCAM_UDFW_START);
 //	FileSys_DeleteFile("A:\\EthcamTxFW.bin");//MT CJ 2020/420  mv to EthCamAppNetwork.c
 	return bRet;
@@ -2209,8 +2256,16 @@ extern MOVIE_RECODE_FILE_OPTION gMovie_Rec_Option;
 #define DISPLAY_TIME 10
 BOOL Gsen_Carsta = FALSE;
 UINT8 Ethcam_disconnect_cnt = 0;
+BOOL EthDisconRebooting = FALSE;
+BOOL testreboot = FALSE;
+UINT8 testrebootcnt = 0;
+#define LCA_GSENSOR_THREHOLD 10
+#define LCA_GSENSOR_MAXTHREHOLD 65535/2
+BOOL LCA_GSENSOR_Move = FALSE;
 INT32 UIFlowWndMovie_OnTimer(VControl *pCtrl, UINT32 paramNum, UINT32 *paramArray)
 {
+	static BOOL EthDisconRebootFailed = FALSE;
+	static UINT16 EthDisconWaitRebootOkcnt = 0;
 	//#NT#2016/03/07#KCHong -begin
 	//#NT#Low power timelapse function
 #if (TIMELAPSE_LPR_FUNCTION == ENABLE)
@@ -2288,62 +2343,92 @@ INT32 UIFlowWndMovie_OnTimer(VControl *pCtrl, UINT32 paramNum, UINT32 *paramArra
 #endif
 	if (System_GetState(SYS_STATE_CARD)  == CARD_INSERTED){
 	//	debug_msg("--cj gMovData.State:%d %d \r\n",gMovData.State,System_GetGsensorPwrOn());
-    		if((gMovData.State == MOV_ST_VIEW || gMovData.State == (MOV_ST_VIEW|MOV_ST_ZOOM) )&& !autoRec) {
+		if((gMovData.State == MOV_ST_VIEW || gMovData.State == (MOV_ST_VIEW|MOV_ST_ZOOM) )&& !autoRec) {
 
-				if(System_GetGsensorPwrOn() ) {
-					if(!FlowMovie_IsStorageErr(FALSE) ) {
-						Ux_PostEvent(NVTEVT_KEY_SHUTTER2, 1, NVTEVT_KEY_PRESS);
-                        System_SetParkPwroffTimeCount(60);
-						isEnterParkingMode =TRUE;
-                    } else{
-                        System_SetParkPwroffTimeCount(5);
-                    }
-                } else{
-                    #if (defined(_NVT_ETHREARCAM_RX_))  
-					if (0) // ( bDetEthcamUpdate)
-					{
-						bDetEthcamUpdateCount ++;
-						if ( bDetEthcamUpdateCount == 4) // 2s
-						{
-							bDetEthcamUpdate = FALSE;
-							bDetEthcamUpdateCount = 0;
-							 System_UpdateTx();
-							Delay_DelayMs(100);
-						}
-					}else{//for (i = 0; ((i < ETH_REARCAM_CAPS_COUNT) && g_IsAutoStartRec); i++) 
-						if (isStopREC)
-						{
-			 				; //do nothing
-						}else{    
-		/*����������	*/			if(EthCamNet_GetEthLinkStatus(ETHCAM_PATH_ID_1 )==ETHCAM_LINK_UP) 
-							{      
-		/*�������ӳɹ�*/				if(bflag_EthLinkFinish ==TRUE &&socketCliEthData1_IsRecv(ETHCAM_PATH_ID_1 )){
-								CHKPNT;				        
-								Ux_PostEvent(NVTEVT_KEY_SHUTTER2 , 1, NVTEVT_KEY_PRESS);      
-								Ethcam_disconnect_cnt = 0;
-								autoRec = TRUE;  
-								} else{
-									CHKPNT;
-									Ethcam_disconnect_cnt++;
-		/*��������ʧ��*/					if(Ethcam_disconnect_cnt > 5000/TIMER_HALF_SEC ){//5s����δ���ӳɹ�
-									Ethcam_disconnect_cnt = 0;
-									Ux_PostEvent(NVTEVT_KEY_SHUTTER2 , 1, NVTEVT_KEY_PRESS);
-									CloseTimer();
-									Ux_OpenWindow(&UIFlowWndWaitMomentCtrl, 1, UIFlowWndWaitMoment_StatusTXT_Msg_STRID_ETHCAM_DETFAIL);
-								}
-								}
-		/*����������	*/			} else{
-								CHKPNT;
-								Ux_PostEvent(NVTEVT_KEY_SHUTTER2 , 1, NVTEVT_KEY_PRESS);      
-								autoRec = TRUE;
-								//��ʱȡ��
-								//Ux_OpenWindow(&UIFlowWndWaitMomentCtrl, 1, UIFlowWndWaitMoment_StatusTXT_Msg_STRID_ETHCAM_DETFAIL);
+			if(System_GetGsensorPwrOn() ) {
+				if(!FlowMovie_IsStorageErr(FALSE) ) {
+					Ux_PostEvent(NVTEVT_KEY_SHUTTER2, 1, NVTEVT_KEY_PRESS);
+	                System_SetParkPwroffTimeCount(60);
+					isEnterParkingMode =TRUE;
+	            } else{
+	                System_SetParkPwroffTimeCount(5);
+	            }
+	        } else{
+	        #if (defined(_NVT_ETHREARCAM_RX_))  
+				if (isStopREC)
+				{
+	 				; //do nothing
+				}else if(EthCamNet_GetEthLinkStatus(ETHCAM_PATH_ID_1 )==ETHCAM_LINK_UP) {    
+					   
+					DBGD(EthDisconRebootcnt);
+					if((bflag_EthLinkFinish == TRUE && socketCliEthData1_IsRecv(ETHCAM_PATH_ID_1))){
+						CHKPNT;
+						Ux_PostEvent(NVTEVT_KEY_SHUTTER2 , 1, NVTEVT_KEY_PRESS);
+						//EthCam_SendXMLCmd(0, ETHCAM_PORT_DEFAULT ,ETHCAM_CMD_DUMP_TX_BS_INFO, 0);
+						
+						Ethcam_disconnect_cnt = 0;
+						autoRec = TRUE;
+						EthDisconRebooting = FALSE;
+						EthDisconRebootcnt = 0;
+					} else {
+						CHKPNT;
+						Ethcam_disconnect_cnt++;
+						if((Ethcam_disconnect_cnt > 5000/TIMER_HALF_SEC) ){
+							Ethcam_disconnect_cnt = 0;
+							//Ux_PostEvent(NVTEVT_KEY_SHUTTER2 , 1, NVTEVT_KEY_PRESS);
+							// 0:power on ethcam connect failed 
+							// 3:link down while recording and reboot three times failed
+							if((EthDisconRebootcnt == 0 || EthDisconRebootcnt == 3)){CHKPNT;
+								EthDisconRebootcnt ++;
+								UxState_SetData(&UIFlowWndMovie_StatusTextCtrl, STATE_CURITEM, UIFlowWndMovie_StatusText_STRID_1920P30);
+								UxState_SetData(& UIFlowWndMovie_Status_Movie_BCtrl, STATE_CURITEM, UIFlowWndMovie_Status_Movie_B_ICON_TOP_BACK_OFF);
+								CloseTimer();
+								Ux_OpenWindow(&UIFlowWndWaitMomentCtrl, 1, UIFlowWndWaitMoment_StatusTXT_Msg_STRID_ETHCAM_DETFAIL);
+							}else{CHKPNT;
+								EthDisconRebooting = TRUE;
+								EthDisconRebootcnt ++;
+								Ux_PostEvent(NVTEVT_SYSTEM_MODE, 1, System_GetState(SYS_STATE_CURRMODE)); // try to reboot
 							}
 						}
 					}
+				} else{
+					CHKPNT;
+					Ux_PostEvent(NVTEVT_KEY_SHUTTER2 , 1, NVTEVT_KEY_PRESS);      
+					autoRec = TRUE;
+					//��ʱȡ��
+					//Ux_OpenWindow(&UIFlowWndWaitMomentCtrl, 1, UIFlowWndWaitMoment_StatusTXT_Msg_STRID_ETHCAM_DETFAIL);
+				}
 			#endif
-                }
-        	}
+	        }
+		}else{ // MOV_ST_REC
+			if(EthCamNet_GetEthLinkStatus(ETHCAM_PATH_ID_1 ) == ETHCAM_LINK_UP) 
+			{      
+				//CHKPNT;
+				// lose data while recording
+				if((bflag_EthLinkFinish == FALSE || socketCliEthData1_IsRecv(ETHCAM_PATH_ID_1 ) == FALSE) && bGetTxFirmware == FALSE){
+					CHKPNT;
+					Ethcam_disconnect_cnt++;
+					if((Ethcam_disconnect_cnt > 2000/TIMER_HALF_SEC) ){ //wait for data again 
+						Ethcam_disconnect_cnt = 0;
+						if(EthDisconRebootcnt < 3 && System_IsModeChgClose() == FALSE && EthDisconRebooting == FALSE){
+							CHKPNT;
+							EthDisconRebootcnt++;
+							EthDisconRebooting = TRUE;
+							Ux_PostEvent(NVTEVT_SYSTEM_MODE, 1, System_GetState(SYS_STATE_CURRMODE)); // try to reboot
+						}
+					}
+				}else{ //link up && data recv
+					Ethcam_disconnect_cnt = 0;
+				}
+			}else{ //link down
+				Ethcam_disconnect_cnt++;
+				if((Ethcam_disconnect_cnt > 1000/TIMER_HALF_SEC) ){ //wait for reconnect again 
+					Ethcam_disconnect_cnt = 0;
+					UxState_SetData(&UIFlowWndMovie_StatusTextCtrl, STATE_CURITEM, UIFlowWndMovie_StatusText_STRID_1920P30);
+					UxState_SetData(& UIFlowWndMovie_Status_Movie_BCtrl, STATE_CURITEM, UIFlowWndMovie_Status_Movie_B_ICON_TOP_BACK_OFF);
+				}
+			}
+		}
 	}else{
 		//Ux_OpenWindow(&UIFlowWndWrnMsgCtrl, 2, UIFlowWndWrnMsg_StatusTXT_Msg_STRID_PLEASE_INSERT_SD, FLOWWRNMSG_TIMER_2SEC);
 
@@ -2384,7 +2469,41 @@ INT32 UIFlowWndMovie_OnTimer(VControl *pCtrl, UINT32 paramNum, UINT32 *paramArra
 #endif
 		break;
 
-	case NVTEVT_1SEC_TIMER:	
+	case NVTEVT_1SEC_TIMER:
+
+#if(Ethcam_PIPTestFunc == ENABLE)
+		if(Ethcam_PipTest){
+			if(Ethcam_PipTestCnt < 3){
+				Ethcam_PipTestCnt++;
+			}else{
+				Ethcam_PipTestCnt = 0;
+				//changepip
+				if(EthCamNet_GetEthLinkStatus(0) == ETHCAM_LINK_UP) {
+					if(SysGetFlag(FL_DUAL_CAM) == DUALCAM_FRONT  ) {
+						CHKPNT;
+						SysSetFlag(FL_DUAL_CAM,DUALCAM_BEHIND);
+					}else {
+						SysSetFlag(FL_DUAL_CAM,DUALCAM_FRONT);
+					}
+				}else{
+					//CloseTimer();
+					//Ux_OpenWindow(&UIFlowWndWaitMomentCtrl, 1, UIFlowWndWaitMoment_StatusTXT_Msg_STRID_ETHCAM_DETFAIL);
+				}
+			}
+		}
+#endif
+
+#if(Auto_Reboot_PIP_TestFunc == ENABLE)
+	static UINT8 Reboot_PIP_Cnt = 0;
+	DBGD(Reboot_PIP_Cnt);
+	if(Ethcam_Reboot_PipTest){
+		if(15 - Reboot_PIP_Cnt){
+			Reboot_PIP_Cnt++;
+		}else{
+			GxSystem_HWResetNOW();
+		}
+	}
+#endif
 		if ( bFocusUrg)
 		{
 			FocusUrgCount ++;
@@ -2410,12 +2529,11 @@ INT32 UIFlowWndMovie_OnTimer(VControl *pCtrl, UINT32 paramNum, UINT32 *paramArra
 			FoucusBhindPanelCount =0;
 		}
 		Fun_UpdateRecIcon();
-		if  ( bFoucusBehindPanel)
+		if( bFoucusBehindPanel)
 		{
 			UxCtrl_SetShow(&UIFlowWndMovie_Panel_BehindCtrl, TRUE); 
 		}else{
 			UxCtrl_SetShow(&UIFlowWndMovie_Panel_BehindCtrl, FALSE); 
-
 		}
 		
 		if(bGetTxFirmware)//do ethcam fwupdate here
@@ -2424,8 +2542,12 @@ INT32 UIFlowWndMovie_OnTimer(VControl *pCtrl, UINT32 paramNum, UINT32 *paramArra
 		   uiSysTimeFwUpd ++;
 		   if(uiSysTimeFwUpd == 3)
 		   {
-		      bGetTxFirmware = FALSE;
-			  SxCmd_DoCommand("ts ethcamfwud");
+		   	  CHKPNT;
+			  CloseTimer();
+			  //bGetTxFirmware = FALSE;
+			  Ux_OpenWindow(&UIFlowWndWaitMomentCtrl, 1, UIFlowWndWaitMoment_StatusTXT_Msg_STRID_ETHCAM_UDFW_SENDFW);
+			 // Ethcam_tx_fwupdate();
+
 		   }
 		}
 		
@@ -2529,25 +2651,21 @@ CHKPNT;
         static INT8 iLCA_DisCntL = -1, iLCA_DisCntM = -1, iLCA_DisCntR = -1;
         static INT8 iLCA_VoiceCnt = -1;
 		static INT16 iLCA_CarStopCnt = -1;
-		static INT8 iLCA_CarStopsta = FALSE;	//ͣ��״̬
-		static short prev_GX = 0, prev_GY = 0, prev_GZ = 0;
+		static INT8 iLCA_CarStopsta = FALSE;	
+		static INT32 prev_GX = 0;
+		static INT32 prev_GY = 0;
+		static INT32 prev_GZ = 0;
 		INT32 iGX = 0, iGY = 0, iGZ = 0;
 		static BOOL first_cmp = FALSE;
-		static INT8 G_CarStopcnt = 0;	//ͣ��֮��Gsensor����������
+		static INT8 G_CarStopcnt = 0;	
 		static UINT16 Gsen_trg_Cnt = 0;
         if(UI_GetData(FL_ALARM_LCA) == ALARM_LCA_OFF)
             break;
-/***�����߼�:	
-Gsensor�ƶ�����ʼ����--->��������--->Gsensor���ƶ���ֹͣ����--->Gsensor�ƶ�����ʼ����
-					  ��		|
-					  |		��
-				Gsensor�ƶ�����ʼ����		
-***/
 		if(GSensor_IsOpened())
 			GSensor_GetAxisValue(&iGX,&iGY,&iGZ);
 			//Gsen_trg_Cnt++;				
 			//DBGD(G_CarStop);
-			if(first_cmp == FALSE)		//��һ�αȽ�
+			if(first_cmp == FALSE)		
 			{
 				first_cmp = TRUE;
 				prev_GX = iGX;
@@ -2555,44 +2673,81 @@ Gsensor�ƶ�����ʼ����--->��������--->Gsensor
 				prev_GZ = iGZ;
 			}
 			//debug_msg("mmmm GS preDATA(%d, %d, %d)\r\n", prev_GX,prev_GY,prev_GZ);	
-			//debug_msg("mmmm GS DATA(%d, %d, %d)\r\n", iGX,iGY,iGZ); 
-			if( abs(iGX - prev_GX) > 12		//Gsensor �ƶ��ж�
-				||abs(iGY- prev_GY) > 12
-				||abs(iGZ- prev_GZ) > 12 )
+			//debug_msg("mmmm GS nowDATA(%d, %d, %d)\r\n", iGX,iGY,iGZ); 
+
+			
+			
+			if( abs(iGX - prev_GX) > LCA_GSENSOR_THREHOLD	||	
+				abs(iGY - prev_GY) > LCA_GSENSOR_THREHOLD	||
+				abs(iGZ - prev_GZ) > LCA_GSENSOR_THREHOLD)
 			{
-				//debug_msg("mmmm GS preDATA(%d, %d, %d)\r\n", prev_GX,prev_GY,prev_GZ);	
-				//debug_msg("mmmm GS DATA(%d, %d, %d)\r\n", iGX,iGY,iGZ); 
-				//debug_msg("mmmm GS absDATA(%d, %d, %d)\r\n", abs(iGX - prev_GX), abs(iGY- prev_GY), abs(iGZ- prev_GZ)); 
-				//�����ָ���ʼ��
+				#if 1
+				//if data is between 65535-threhold and 0+threhold
+				if(((iGX+prev_GX)> (65535- LCA_GSENSOR_THREHOLD-1)) && ((iGX+prev_GX)<(65535+LCA_GSENSOR_THREHOLD+1))){
+					//and deviation is bigger than threhold
+					if((65535)>(LCA_GSENSOR_THREHOLD+abs(iGX-prev_GX))){CHKPNT;
+						LCA_GSENSOR_Move = TRUE;
+					}else {CHKPNT;
+						LCA_GSENSOR_Move = FALSE;
+					}
+				}else if(((iGY+prev_GY)> (65535- LCA_GSENSOR_THREHOLD-1)) && ((iGY+prev_GY)<(65535+LCA_GSENSOR_THREHOLD+1))){
+					if((65535)>(LCA_GSENSOR_THREHOLD+abs(iGY-prev_GY))){CHKPNT;
+						LCA_GSENSOR_Move = TRUE;
+					}else {CHKPNT;
+						LCA_GSENSOR_Move = FALSE;
+					}
+				}else if(((iGZ+prev_GZ)> (65535- LCA_GSENSOR_THREHOLD-1)) && ((iGZ+prev_GZ)<(65535+LCA_GSENSOR_THREHOLD+1))){
+					if((65535)>(LCA_GSENSOR_THREHOLD+abs(iGZ-prev_GZ))){CHKPNT;
+						LCA_GSENSOR_Move = TRUE;
+					}else {CHKPNT;
+						LCA_GSENSOR_Move = FALSE;
+					}
+				}else{CHKPNT;
+					LCA_GSENSOR_Move = TRUE;
+				}
+			#else
+				LCA_GSENSOR_Move = TRUE;
+			#endif
+			}else{
+				LCA_GSENSOR_Move = FALSE;
+			}
+			
+			//car is moving
+			//data update
+			//all status reply
+			if(LCA_GSENSOR_Move){
 				G_CarStopcnt = 0;
 				iLCA_CarStopsta = FALSE;
 				iLCA_CarStopCnt = 0;
+				//debug_msg("mmmm GS preDATA(%d, %d, %d)\r\n", prev_GX,prev_GY,prev_GZ);	
+				//debug_msg("mmmm GS DATA(%d, %d, %d)\r\n", iGX,iGY,iGZ); 
 				prev_GX = iGX;
 				prev_GY = iGY;
 				prev_GZ = iGZ;
-				Gsen_Carsta = 1;
+				Gsen_Carsta = TRUE;
 				Gsen_trg_Cnt = 0;
 			}else{ 	
-				if(iLCA_CarStopCnt == 2){//����2��
-					if(G_CarStopcnt<11)
+				if(iLCA_CarStopCnt == 2){ //gsensor no trriger 2 times(10s)
+					if(G_CarStopcnt < 11)//gsensor no trriger 5s again
 					    G_CarStopcnt++;
 					else{
-						if(Gsen_Carsta)//���̵�
-						iLCA_CarStopsta = TRUE;
+						if(Gsen_Carsta)
+							iLCA_CarStopsta = TRUE;//car is stop
 					}
 				}
 				if(Gsen_Carsta){
 					Gsen_trg_Cnt++;
-					if(Gsen_trg_Cnt==6000/TIMER_LCA_SEC){//5s
-						Gsen_trg_Cnt=0;
+					if(Gsen_trg_Cnt == 5000/TIMER_LCA_SEC){//5s
+						Gsen_trg_Cnt = 0;
 						Gsen_Carsta = 0;
 					}
 				}
 			}
 		
         /////////////Display
-		//iLCA_CarStopsta = FALSE;//È¡ÏûËõ¶ÌÊ±³¤£¬MD_GsensorÊ±³¤ÒÑ¾­Îª5s×óÓÒ
-		//iLCA_CarStopCnt=0;//È¡ÏûËõ¶ÌÊ±³¤£¬MD_GsensorÊ±³¤ÒÑ¾­Îª5s×óÓÒ
+		//iLCA_CarStopsta = FALSE;
+		//iLCA_CarStopCnt=0;
+		bLCA_Alarm_M = FALSE;
 		if(bLCA_Alarm_M == TRUE)
 		{
 			bLCA_Alarm_M = FALSE;
@@ -2662,7 +2817,7 @@ Gsensor�ƶ�����ʼ����--->��������--->Gsensor
         if(iLCA_DisCntL != -1)
         {
             iLCA_DisCntL++;
-            if(iLCA_DisCntL == (6000 / TIMER_LCA_SEC)) {
+            if(iLCA_DisCntL == (5000 / TIMER_LCA_SEC)) {
                 iLCA_DisCntL = -1;
                 UxCtrl_SetShow(&UIFlowWndMovie_Status_Alarm_LCtrl, FALSE);
             }
@@ -2676,9 +2831,9 @@ Gsensor�ƶ�����ʼ����--->��������--->Gsensor
 		if(iLCA_DisCntM != -1)
 		{
             iLCA_DisCntM++;
-			if(iLCA_DisCntM == (6000 / TIMER_LCA_SEC)) {	//����ʱ��3s,��7��
+			if(iLCA_DisCntM == (5000 / TIMER_LCA_SEC)) {	// 5s per cycle
 				iLCA_CarStopCnt++;
-				if(iLCA_CarStopCnt == 2)	//±¨¾¯2´Î
+				if(iLCA_CarStopCnt == 2)
 				{
 				}
 	            iLCA_DisCntM = -1;
@@ -2692,7 +2847,7 @@ Gsensor�ƶ�����ʼ����--->��������--->Gsensor
         	//iLCA_CarStopCnt=0;
         	//iLCA_CarStopsta=0;
             iLCA_DisCntR++;
-            if(iLCA_DisCntR == (6000 / TIMER_LCA_SEC)) {
+            if(iLCA_DisCntR == (5000 / TIMER_LCA_SEC)) {
                 iLCA_DisCntR = -1;
                 UxCtrl_SetShow(&UIFlowWndMovie_Status_Alarm_RCtrl, FALSE);
             }
@@ -2708,7 +2863,7 @@ Gsensor�ƶ�����ʼ����--->��������--->Gsensor
 
         if(iLCA_VoiceCnt != -1)
         {
-            if((uiLCA_Alarm_level_Left == USER_AVLCA_WRN_LEVEL_L) \
+            if((uiLCA_Alarm_level_Left == USER_AVLCA_WRN_LEVEL_L) 
                 ||(uiLCA_Alarm_level_Right == USER_AVLCA_WRN_LEVEL_L)
                 ||(uiLCA_Alarm_level_Mid == USER_AVLCA_WRN_LEVEL_L))
             {
@@ -2720,7 +2875,7 @@ Gsensor�ƶ�����ʼ����--->��������--->Gsensor
                 ||(uiLCA_Alarm_level_Right == USER_AVLCA_WRN_LEVEL_H)
                 ||(uiLCA_Alarm_level_Mid == USER_AVLCA_WRN_LEVEL_H))
             {
-            	if((iLCA_VoiceCnt % (500 / TIMER_LCA_SEC)) == 0)	//0.5s��һ��
+            	if((iLCA_VoiceCnt % (500 / TIMER_LCA_SEC)) == 0)	//0.5s
         		{
                		GxSound_Play(DEMOSOUND_SOUND_KEY_TONE);
             	}
@@ -3550,7 +3705,7 @@ INT32 UIFlowWndMovie_OnLCA_Alarm(VControl *pCtrl, UINT32 paramNum, UINT32 *param
         uiLCA_Alarm_level_Left = paramArray[0];
 		uiLCA_Alarm_level_Mid = paramArray[1];
         uiLCA_Alarm_level_Right = paramArray[2];
-        //debug_msg("uiLCA_Alarm_level_Left=%d,uiLCA_Alarm_level_Mid=%d,uiLCA_Alarm_level_Right=%d\r\n", uiLCA_Alarm_level_Left,uiLCA_Alarm_level_Mid,uiLCA_Alarm_level_Right);
+        debug_msg("uiLCA_Alarm_level_Left=%d\r\n uiLCA_Alarm_level_Mid=%d\r\n uiLCA_Alarm_level_Right=%d\r\n", uiLCA_Alarm_level_Left,uiLCA_Alarm_level_Mid,uiLCA_Alarm_level_Right);
         switch(paramArray[0])
         {
             case USER_AVLCA_WRN_NONE:
@@ -3836,7 +3991,7 @@ INT32 UIFlowWndMovie_BackLightLvl_Bar_OnTouchPanelClick(VControl *pCtrl, UINT32 
     	}else if ( iCur_BL_FinalPos > 1040 || iCur_BL_FinalPos == 1040 ){
 			iCur_BL_FinalPos = 99;
 		}else{
-			iCur_BL_FinalPos = (iCur_BL_Offest -314)  *0.14;
+			iCur_BL_FinalPos = ((iCur_BL_Offest -314)  *100)/(1040-314);
 		}
 	#endif
 	DBGD(iCur_BL_FinalPos);
@@ -5119,8 +5274,8 @@ INT32 UIFlowWndMovie_BTN_BehindUP_OnTouchPanelClick(VControl *pCtrl, UINT32 para
 #endif
 			FoucusBhindPanelCount =0;
 		//	Fun_UpdateBehindString();
-		}
-	else if(isIMG_Front == TRUE){
+		}else if(isIMG_Front == TRUE){
+		
 		UINT32 F_Data = SysGetFlag(FL_SENSOR1_DISP_OFFSET);
 		//debug_msg("\r\n F_Data:%d \r\n",F_Data);
 		if(F_Data > IMG_DISP_POS_0)

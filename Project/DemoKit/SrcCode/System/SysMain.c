@@ -78,6 +78,155 @@ UINT32 UI_EventTraceLvl = 0;
 int UserMainProc_Init(void);
 int UserMainProc_Exit(void);
 
+#if(STARTWDT_FUNCTION==ENABLE)
+static BOOL bWDTStatus = FALSE;
+BOOL SysIsWDTWorking(void)
+{
+	return bWDTStatus;
+}
+void SysStartWDT(void)
+{
+	if(bWDTStatus == FALSE)
+	{		
+		wdt_close();
+		Delay_DelayUs(1000); //wait message output complet
+		
+		if(wdt_open()){
+			DBG_ERR("wdt open failed!\r\n");
+		}
+		wdt_setConfig(WDT_CONFIG_ID_MODE, WDT_MODE_RESET);
+		wdt_setConfig(WDT_CONFIG_ID_TIMEOUT, 5000); // 5s time out
+		wdt_enable();
+		wdt_clearTimeout();
+		DBG_DUMP("wdt open success\r\n");
+	    bWDTStatus = TRUE;
+	}
+	
+}
+void SysStopWDT(void)
+{
+       if(bWDTStatus == TRUE)
+       {
+            bWDTStatus = FALSE;
+            wdt_clearTimeout(); 
+            wdt_trigger();
+            wdt_disable();
+            wdt_close();
+			Delay_DelayUs(1000); //wait message output complet
+       }
+}
+void SysFeedWDT(void)
+{
+	if(bWDTStatus == TRUE)
+	{
+		wdt_clearTimeout(); 
+		wdt_trigger();
+	}
+}
+/*
+extern UINT32 gWDT_AE_Cnt;
+static UINT32 ae_hang_cnt=0;
+void WDT_ResetSensorVDSignal_AECnt(void)
+{
+	ae_hang_cnt=0;
+}
+void WDT_SensorVDSignal_Check(UINT32 overcnt)
+{
+    static UINT32 pre_wdt_ae_cnt=0xffffffff;
+    if(pre_wdt_ae_cnt == gWDT_AE_Cnt){
+        ae_hang_cnt++;
+        //debug_msg(" ====ae_hang_cnt:%d=======overcnt:%d===== \r\n",ae_hang_cnt,overcnt);
+        if(ae_hang_cnt>overcnt){
+            DBG_ERR("mmmmmmmmm  Gvd hang reset\r\n");
+            wdt_waitTimeout();
+        }
+    }else
+       ae_hang_cnt = 0;
+    
+    pre_wdt_ae_cnt = gWDT_AE_Cnt;
+    if(gWDT_AE_Cnt > 0xfffff)
+        gWDT_AE_Cnt = 0;
+}*/
+#endif
+
+
+//=========
+//for wdt
+#if (SYSWDT_FUNC  ==  ENABLE)
+
+#define PRI_SYS_WDT          30
+#define STKSIZE_SYS_WDT        2048//
+UINT32 SYS_WDT_TASK_ID = 0;
+UINT32 FLG_ID_SYS_WDT_TASK = 0;
+extern void SysWdtTsk(void);
+
+
+static BOOL bWdtTaskOpened = FALSE;
+
+BOOL Sys_Wdt_Open(void)
+{
+    sta_tsk(SYS_WDT_TASK_ID,0);
+    loc_cpu();
+	bWdtTaskOpened = TRUE;
+    unl_cpu();
+		return TRUE;
+}
+
+
+BOOL Sys_Wdt_Close(void)
+{
+	if(!bWdtTaskOpened)
+		return FALSE;
+	
+    ter_tsk(SYS_WDT_TASK_ID);
+    loc_cpu();
+		bWdtTaskOpened = FALSE;
+    unl_cpu();
+		return TRUE;
+
+}
+
+
+void	Sys_Wdt_InstallID(void)
+{
+    OS_CONFIG_TASK(SYS_WDT_TASK_ID, PRI_SYS_WDT, STKSIZE_SYS_WDT, SysWdtTsk);
+    OS_CONFIG_FLAG(FLG_ID_SYS_WDT_TASK);
+
+}
+
+
+void SysWdtTsk(void)
+{
+
+	wdt_open();
+	wdt_setConfig(WDT_CONFIG_ID_MODE,WDT_MODE_RESET);
+	wdt_setConfig(WDT_CONFIG_ID_TIMEOUT,8000);	//ms
+	wdt_trigger();
+	wdt_enable();
+
+	while(1)
+	{
+        	Delay_DelayMs(1000);
+
+		if( System_GetState(SYS_STATE_CURRMODE) ==  PRIMARY_MODE_MOVIE ) 
+		{
+				//debug_msg("mmmmmm feed dog __movie\r\n");
+				wdt_clearTimeout();
+				wdt_trigger();
+			
+		}else {
+				wdt_clearTimeout();
+				wdt_trigger();
+				//debug_msg("mmmmmm feed dog  __nomovie\r\n");
+
+		}
+
+	}
+
+}
+#endif
+//=========
+
 void UserWaitEvent(NVTEVT wait_evt, UINT32 *wait_paramNum, UINT32 *wait_paramArray)
 {
 	NVTEVT evt = 0; //fix for CID 45083
@@ -226,7 +375,7 @@ void UserMainProc(void)
 	//////////////////////////////////////////////////////////////
 
 // USB_CONNECT_CHARGER
-debug_msg("--cj  GxUSB_GetConnectType:%d ",GxUSB_GetConnectType());
+	debug_msg("--cj  GxUSB_GetConnectType:%d ",GxUSB_GetConnectType());
 //#MT#lyb -20200403 -begin
     if(GxSystem_GetPowerOnSource() == GX_PWRON_SRC_PWR_VBAT) 
     {
@@ -283,7 +432,9 @@ debug_msg("--cj  GxUSB_GetConnectType:%d ",GxUSB_GetConnectType());
 	
     debug_msg("wdt_getResetNum: %d\r\n", wdt_getResetNum());
 //#MT#lyb -20200403 -end
-
+#if(STARTWDT_FUNCTION==ENABLE)
+	SysStartWDT();
+#endif
 
 
 

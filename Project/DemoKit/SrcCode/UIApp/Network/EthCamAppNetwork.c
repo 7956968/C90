@@ -193,6 +193,7 @@ int EthCamNet_UDPSocket_Recv(char *addr, int size)
 			strcpy(SocketInfo[0].mac, chCliMacAddr);
 			strcpy(cmdname, "");
 			snprintf(cmdname, sizeof(cmdname) - 1, "SrvCliConnIPLink %d %d",ipstr2int(SocketInfo[0].ip), ETHCAM_LINK_UP);
+			CHKPNT;
 			EthCamNet_EthLinkStatusNotify(cmdname);
 			gEthCamDhcpSrvConnIpAddr=CliIPAddr;
 		}
@@ -276,6 +277,7 @@ void EthCamNet_SetPrevEthLinkStatus(ETHCAM_PATH_ID path_id, UINT32 LinkStatus)
 }
 
 extern BOOL autoRec;//111
+extern BOOL bGetTxFirmware;
 void EthCamNet_EthLinkStatusNotify(char *cmd)
 {
 	//CHKPNT;
@@ -395,12 +397,14 @@ char cmdname[40];
 		EthCamNet_EthHubChkPortReadyTimerClose();
 		EthCamNet_EthHubPortReadySendCmdTimerClose();
 		if (System_GetState(SYS_STATE_CURRSUBMODE) == SYS_SUBMODE_UPDFW && g_bEthCamApp_IperfTest==0) {
-			Ux_OpenWindow(&UIFlowWndWaitMomentCtrl, 1, UIFlowWndWaitMoment_StatusTXT_Msg_STRID_ETHCAM_UDFW_FINISH);
+			UxState_SetData(&UIFlowWndWaitMoment_StatusTXT_MsgCtrl, STATE_CURITEM, UIFlowWndWaitMoment_StatusTXT_Msg_STRID_ETHCAM_UDFW_FINISH);
+			//Ux_OpenWindow(&UIFlowWndWaitMomentCtrl, 1, UIFlowWndWaitMoment_StatusTXT_Msg_STRID_ETHCAM_UDFW_FINISH);
 			Delay_DelayMs(1000);
+			CHKPNT;
 			Ux_CloseWindow(&UIFlowWndWaitMomentCtrl, 0);
 			FileSys_DeleteFile("A:\\FW671_AA.bin");//MT CJ 2020/420 //EthcamTxFW
 			autoRec = FALSE;//11
-
+			bGetTxFirmware = FALSE;
 			System_ChangeSubMode(SYS_SUBMODE_NORMAL);
 			Ux_SendEvent(0, NVTEVT_SYSTEM_MODE, 1, PRIMARY_MODE_MOVIE);
 		}
@@ -468,6 +472,7 @@ void EthCamNet_LinkDetStreamRestart(UINT32 pathid)
 {
 	CHAR cmd[40]={0};
 	snprintf(cmd, 40, "EthRestart %d %d", ipstr2int(SocketInfo[pathid].ip),ETHCAM_LINK_DOWN);
+	CHKPNT;
 	EthCamNet_EthLinkStatusNotify(cmd);
 	snprintf(cmd, 40, "EthRestart %d %d", ipstr2int(SocketInfo[pathid].ip),ETHCAM_LINK_UP);
 	EthCamNet_EthLinkStatusNotify(cmd);
@@ -766,6 +771,7 @@ void EthCamNet_SrvCliConnIPAddrNofity(char *cmd)
 				strcpy(SocketInfo[i].mac, chCliMacAddr);
 				//DBG_DUMP("Srv SocketInfo[%d].ip=%s\r\n",i,SocketInfo[i].ip);
 				snprintf(cmdname, sizeof(cmdname) - 1, "SrvCliConnIPLink %d %d",ipstr2int(SocketInfo[i].ip), (EthCamEthHub_LinkStatus[i] == 1) ? ETHCAM_LINK_UP : ETHCAM_LINK_DOWN);
+				CHKPNT;
 				EthCamNet_EthLinkStatusNotify(cmdname);
 				break;
 			}
@@ -784,6 +790,7 @@ void EthCamNet_SrvCliConnIPAddrNofity(char *cmd)
 	strcpy(SocketInfo[0].mac, chCliMacAddr);
 	DBG_DUMP("SocketInfo[0].ip=%s\r\n",SocketInfo[0].ip);
 	snprintf(cmdname, sizeof(cmdname) - 1, "SrvCliConnIPLink %d %d",ipstr2int(SocketInfo[0].ip), ETHCAM_LINK_UP);
+	CHKPNT;
 	EthCamNet_EthLinkStatusNotify(cmdname);
 	#endif
 }
@@ -892,6 +899,7 @@ void EthCamNet_EthHubLinkDet(void)
 						SxTimer_SetFuncActive(SX_TIMER_ETHCAM_ETHLINKRETRY_ID, TRUE);
 					}
 					snprintf(cmd, sizeof(cmd) - 1, "EthHubLink %d %d",ipstr2int(SocketInfo[i].ip), (EthCamEthHub_LinkStatus[i] == 1) ? ETHCAM_LINK_UP : ETHCAM_LINK_DOWN);
+					CHKPNT;
 					EthCamNet_EthLinkStatusNotify(cmd);
 				}else{
 					//DBG_ERR("SocketInfo[%d].ip=0x%x, HubSta=%d\r\n",i,ipstr2int(SocketInfo[i].ip),EthCamEthHub_LinkStatus[i]);

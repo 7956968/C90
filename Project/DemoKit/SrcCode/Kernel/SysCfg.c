@@ -651,6 +651,9 @@ void Install_User(void)
 #if (GPS_FUNCTION == ENABLE)
 	GPS_InstallID();
 #endif
+#if (SYSWDT_FUNC  ==  ENABLE)
+		Sys_Wdt_InstallID();
+#endif
 	NvtUser_InstallID();
 	NvtBack_InstallID();
 #if(UI_FUNC==ENABLE)
