@@ -29,7 +29,7 @@ extern UINT32 System_GetEnableSensor(void);
 #endif
 
 //---------------------MenuCommonItemCtrl Global Variables -----------------------------
-#define PAGE           11
+#define PAGE           12
 //---------------------MenuCommonItemCtrl Prototype Declaration  -----------------------
 #if defined(_KEY_METHOD_4KEY_)
 #define MENU_KEY_PRESS_MASK        (FLGKEY_UP|FLGKEY_DOWN|FLGKEY_RIGHT|FLGKEY_SHUTTER2)
@@ -108,23 +108,31 @@ UINT32 MenuCommonItem_GetSubValueIconId(UINT16 ItemId)
                     SubValueId = ICON_SETUP_DATE;
                 }
                 break;
- 
-            case IDS_VOLUME: 
-                if(uiItemTextId_Focus == ItemId){
-                    SubValueId = ICON_SETUP_VOLUME_F;
-                } else {
-                    SubValueId = ICON_SETUP_VOLUME;
-                }
-                break;
- 
-            case IDS_SCREENLIGHT: 
-                if(uiItemTextId_Focus == ItemId){
-                    SubValueId = ICON_SETUP_SCREENLIGHT_F;
-                } else {
-                    SubValueId = ICON_SETUP_SCREENLIGHT;
-                }
-                break;
- 
+				
+			case IDS_MOVIE_AUDIO: 
+				if(uiItemTextId_Focus == ItemId){
+					SubValueId = ICON_SETUP_AUDIO_F;
+				} else {
+					SubValueId = ICON_SETUP_AUDIO;
+				}
+				break;
+								
+			case IDS_MOVIE_CYCLIC_REC: 
+				if(uiItemTextId_Focus == ItemId){
+					SubValueId = ICON_SETUP_CYCLIC_F;
+				} else {
+					SubValueId = ICON_SETUP_CYCLIC;
+				}
+				break;
+				
+			case IDS_VOLUME: 
+				if(uiItemTextId_Focus == ItemId){
+					SubValueId = ICON_SETUP_VOLUME_F;
+				} else {
+					SubValueId = ICON_SETUP_VOLUME;
+				}
+				break;
+					
             case IDS_URGSENSE: 
                 if(uiItemTextId_Focus == ItemId){
                     SubValueId = ICON_SETUP_URGSENSE_F;
@@ -140,31 +148,7 @@ UINT32 MenuCommonItem_GetSubValueIconId(UINT16 ItemId)
                     SubValueId = ICON_SETUP_PARK;
                 }
                 break;
- 
-            case IDS_MOVIE_AUDIO: 
-                if(uiItemTextId_Focus == ItemId){
-                    SubValueId = ICON_SETUP_AUDIO_F;
-                } else {
-                    SubValueId = ICON_SETUP_AUDIO;
-                }
-                break;
-
-            case IDS_MOVIE_SIZE: 
-                if(uiItemTextId_Focus == ItemId){
-                    SubValueId = ICON_SETUP_MOVIESIZE_F;
-                } else {
-                    SubValueId = ICON_SETUP_MOVIESIZE;
-                }
-                break;
-
-            case IDS_MOVIE_CYCLIC_REC: 
-                if(uiItemTextId_Focus == ItemId){
-                    SubValueId = ICON_SETUP_CYCLIC_F;
-                } else {
-                    SubValueId = ICON_SETUP_CYCLIC;
-                }
-                break;
-                
+                 
             case IDS_ALARM: 
                 if(uiItemTextId_Focus == ItemId){
                     SubValueId = ICON_SETUP_ALARM_F;
@@ -176,12 +160,22 @@ UINT32 MenuCommonItem_GetSubValueIconId(UINT16 ItemId)
 			#if(_ANFA_ADAS_MENU_)
 			case IDS_ANFA_ADAS:
 				if(uiItemTextId_Focus == ItemId){
+					CHKPNT;
 					SubValueId = ICON_SETUP_ANFA_ADAS_F;
 				}else{
 					SubValueId = ICON_SETUP_ANFA_ADAS;
 				}
+				break;
 			#endif
- 
+			case IDS_MOVIE_BACKADJUST: 
+                if(uiItemTextId_Focus == ItemId){
+					CHKPNT;
+                    SubValueId = ICON_MENU_BACKLIGHT_F;
+                } else {
+                    SubValueId = ICON_MENU_BACKLIGHT;
+                }
+                break;
+				
              case IDS_FORMAT:
                 if(uiItemTextId_Focus == ItemId){
                     SubValueId = ICON_SETUP_FORMAT_F;
@@ -189,6 +183,7 @@ UINT32 MenuCommonItem_GetSubValueIconId(UINT16 ItemId)
                     SubValueId = ICON_SETUP_FORMAT;
                 }
                 break;
+				
             case IDS_DEFAULT:
                 if(uiItemTextId_Focus == ItemId){
                     SubValueId = ICON_SETUP_RESET_F;
@@ -204,15 +199,22 @@ UINT32 MenuCommonItem_GetSubValueIconId(UINT16 ItemId)
                     SubValueId = ICON_SETUP_ABOUT;
                 }
                 break;
-
-			case IDS_MOVIE_BACKADJUST: 
-                if(uiItemTextId_Focus == ItemId){
-                    SubValueId = ICON_MENU_BACKLIGHT_F;
-                } else {
-                    SubValueId = ICON_MENU_BACKLIGHT;
-                }
-                break;
- 
+				
+			case IDS_MOVIE_SIZE: 
+				if(uiItemTextId_Focus == ItemId){
+					SubValueId = ICON_SETUP_MOVIESIZE_F;
+				} else {
+					SubValueId = ICON_SETUP_MOVIESIZE;
+				}
+				break;
+				
+			case IDS_SCREENLIGHT: 
+				if(uiItemTextId_Focus == ItemId){
+					SubValueId = ICON_SETUP_SCREENLIGHT_F;
+				} else {
+					SubValueId = ICON_SETUP_SCREENLIGHT;
+				}
+				break;
             default:
                 break;
    

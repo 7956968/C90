@@ -941,7 +941,7 @@ enum _MENU_IDF {
 
     IDF_WIFI                        = FL_WIFI,
     IDF_VOLUME                      = FL_VOLUME,
-    IDF_SCREENLIGHT                 = FL_SCREENLIGHT,
+    IDF_SCREENLIGHT                 = FL_MOVIE_BACKADJUST,
     IDF_URGSENSE                    = FL_GSENSOR,
     IDF_PARK                        = FL_MOVIE_PARK,
     IDF_MOVIE_AUDIO                 = FL_MOVIE_AUDIO,

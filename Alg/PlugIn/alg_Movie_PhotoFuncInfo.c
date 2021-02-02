@@ -1584,11 +1584,12 @@ void Movie_AnfaAdasProcessEnd(MEM_RANGE *buf, MEM_RANGE *cachebuf)
 	
 	ANFA_SNG_RESULT_INFO sngRlt;
 	ANFA_TLD_RESULT_INFO tldRlt;
-
 	
 	ANFA_SNG_RESULT_INFO *pSngRlt = &sngRlt;
 	ANFA_TLD_RESULT_INFO *pTldRlt = &tldRlt;
 
+	if(UI_GetData(FL_ANFA_ADAS) == ANFA_ADAS_OFF)
+		return;
 
 	if (GetWavPlayCtrlStatus() != WAVPLAYCTRL_INFINITE_LOOP)
 	{  //for play voice

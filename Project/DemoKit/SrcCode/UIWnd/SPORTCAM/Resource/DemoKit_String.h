@@ -650,5 +650,6 @@ unsigned char gDemoKit_String_RU[];
 #define STRID_ETHCAM_FW_LOSTED                   0x0251
 #define STRID_ETHCAM_UPDATE_FAILED               0x0252
 #define STRID_ETHCAM_SENDFW_FAILED               0x0253
+#define STRID_SETUP_ANFA_ADAS                    0x0254
 
 #endif //_DEMOKIT_STRING_H_

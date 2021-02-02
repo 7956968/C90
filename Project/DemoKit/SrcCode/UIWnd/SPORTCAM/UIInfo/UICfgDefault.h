@@ -163,7 +163,7 @@
 #define DEFAULT_ALARM_LCA               	ALARM_LCA_ON
 //#MT#lyb -20200328 -end
 #if(_ANFA_ADAS_MENU_)
-#define DEFAULT_ANFA_ADAS               	ANFA_ADAS_OFF
+#define DEFAULT_ANFA_ADAS               	ANFA_ADAS_ON
 #endif
 #define DEFAULT_BeepVolumnIndex				BEEP_VOL_3
 

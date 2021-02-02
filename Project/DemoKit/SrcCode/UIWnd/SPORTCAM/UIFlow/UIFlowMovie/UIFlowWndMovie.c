@@ -2659,12 +2659,18 @@ CHKPNT;
 		static BOOL first_cmp = FALSE;
 		static INT8 G_CarStopcnt = 0;	
 		static UINT16 Gsen_trg_Cnt = 0;
+
+		//menu set LCA alarm off
         if(UI_GetData(FL_ALARM_LCA) == ALARM_LCA_OFF)
             break;
+
+
+		//Gsensor judge car is moving or not
 		if(GSensor_IsOpened())
 			GSensor_GetAxisValue(&iGX,&iGY,&iGZ);
 			//Gsen_trg_Cnt++;				
 			//DBGD(G_CarStop);
+			//initial value
 			if(first_cmp == FALSE)		
 			{
 				first_cmp = TRUE;
@@ -2676,7 +2682,7 @@ CHKPNT;
 			//debug_msg("mmmm GS nowDATA(%d, %d, %d)\r\n", iGX,iGY,iGZ); 
 
 			
-			
+			// abs deviation is bigger than threhold
 			if( abs(iGX - prev_GX) > LCA_GSENSOR_THREHOLD	||	
 				abs(iGY - prev_GY) > LCA_GSENSOR_THREHOLD	||
 				abs(iGZ - prev_GZ) > LCA_GSENSOR_THREHOLD)
@@ -2702,19 +2708,19 @@ CHKPNT;
 					}else {CHKPNT;
 						LCA_GSENSOR_Move = FALSE;
 					}
-				}else{CHKPNT;
+				}else{CHKPNT; //data is outside of 65535-threhold and 0+threhold
 					LCA_GSENSOR_Move = TRUE;
 				}
 			#else
 				LCA_GSENSOR_Move = TRUE;
 			#endif
-			}else{
+			}else{//car is not moving
 				LCA_GSENSOR_Move = FALSE;
 			}
 			
 			//car is moving
 			//data update
-			//all status reply
+			//all status reload
 			if(LCA_GSENSOR_Move){
 				G_CarStopcnt = 0;
 				iLCA_CarStopsta = FALSE;
@@ -2747,7 +2753,7 @@ CHKPNT;
         /////////////Display
 		//iLCA_CarStopsta = FALSE;
 		//iLCA_CarStopCnt=0;
-		bLCA_Alarm_M = FALSE;
+		bLCA_Alarm_M = FALSE;	//cancle mid alram
 		if(bLCA_Alarm_M == TRUE)
 		{
 			bLCA_Alarm_M = FALSE;
@@ -4620,13 +4626,13 @@ INT32 UIFlowWndMovie_BTN_Front_OnTouchPanelClick(VControl *pCtrl, UINT32 paramNu
 
 INT32 UIFlowWndMovie_BTN_Front_OnTouchPanelPress(VControl *pCtrl, UINT32 paramNum, UINT32 *paramArray)
 {
-	UxButton_SetItemData(&UIFlowWndMovie_BTN_FrontCtrl, 0, BTNITM_ICONID, ICON_OPERATE_PLAY_F);
+	UxButton_SetItemData(&UIFlowWndMovie_BTN_FrontCtrl, 0, BTNITM_ICONID, ICON_OPERATE_SENSOR_F_F);
     return NVTEVT_CONSUME;
 }
 
 INT32 UIFlowWndMovie_BTN_Front_OnTouchPanelRelease(VControl *pCtrl, UINT32 paramNum, UINT32 *paramArray)
 {
-	UxButton_SetItemData(&UIFlowWndMovie_BTN_FrontCtrl, 0, BTNITM_ICONID, ICON_OPERATE_FRONT);
+	UxButton_SetItemData(&UIFlowWndMovie_BTN_FrontCtrl, 0, BTNITM_ICONID, ICON_OPERATE_SENSOR_F);
 	return NVTEVT_CONSUME;
 }
 
@@ -4689,13 +4695,13 @@ INT32 UIFlowWndMovie_BTN_Behind_OnTouchPanelClick(VControl *pCtrl, UINT32 paramN
 
 INT32 UIFlowWndMovie_BTN_Behind_OnTouchPanelPress(VControl *pCtrl, UINT32 paramNum, UINT32 *paramArray)
 {
-	UxButton_SetItemData(&UIFlowWndMovie_BTN_BehindCtrl, 0, BTNITM_ICONID, ICON_OPERATE_PLAY_F);
+	UxButton_SetItemData(&UIFlowWndMovie_BTN_BehindCtrl, 0, BTNITM_ICONID, ICON_OPERATE_SENSOR_B_F);
     return NVTEVT_CONSUME;
 }
 
 INT32 UIFlowWndMovie_BTN_Behind_OnTouchPanelRelease(VControl *pCtrl, UINT32 paramNum, UINT32 *paramArray)
 {
-	UxButton_SetItemData(&UIFlowWndMovie_BTN_BehindCtrl, 0, BTNITM_ICONID, ICON_OPERATE_PLAY);
+	UxButton_SetItemData(&UIFlowWndMovie_BTN_BehindCtrl, 0, BTNITM_ICONID, ICON_OPERATE_SENSOR_B);
 	return NVTEVT_CONSUME;
 }
 

@@ -11,17 +11,15 @@ extern VControl MenuCommonItem_ListCtrl;//List type
 
 typedef enum
 {
-//MenuCommonItem_List_ICON_SETUP_APP,
-//MenuCommonItem_List_ICON_SETUP_WIFIINFO,
-//MenuCommonItem_List_ICON_SETUP_WIFI,
 MenuCommonItem_List_ICON_SETUP_DATE,
 MenuCommonItem_List_ICON_SETUP_AUDIO,
-MenuCommonItem_List_ICON_SETUP_MOVIESIZE,
 MenuCommonItem_List_ICON_SETUP_CYCLIC,
 MenuCommonItem_List_ICON_SETUP_VOLUME,
 MenuCommonItem_List_ICON_SETUP_URGSENSE,
 MenuCommonItem_List_ICON_SETUP_PARK,
-//MenuCommonItem_List_ICON_SETUP_ALARM,
+MenuCommonItem_List_ICON_SETUP_ALARM,
+MenuCommonItem_List_ICON_SETUP_ANFA_ADAS,
+MenuCommonItem_List_ICON_MENU_BL,
 MenuCommonItem_List_ICON_SETUP_FORMAT,
 MenuCommonItem_List_ICON_SETUP_RESET,
 MenuCommonItem_List_ICON_SETUP_ABOUT,

@@ -950,7 +950,7 @@
 #define _ANFA_ADAS_FUNC_				ENABLE 
 #define _ANFA_ADAS_DRAW_ON_OSD_			DISABLE
 #define _ALPHAVISION_LICENSE_			ENABLE
-#define _ANFA_ADAS_MENU_				DISABLE
+#define _ANFA_ADAS_MENU_				ENABLE
 
 //for Test-----------------
 #define ETHCAM_TX_UPDATE_TEST         	ENABLE

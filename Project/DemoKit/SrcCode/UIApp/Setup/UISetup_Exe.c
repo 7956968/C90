@@ -273,6 +273,7 @@ INT32 SetupExe_OnANFA_ADAS(VControl *pCtrl, UINT32 paramNum, UINT32 *paramArray)
     DBG_IND("uhSelect %d \r\n", uhSelect);
 
     UI_SetData(FL_ANFA_ADAS, uhSelect);
+	DBGD(uhSelect);
 
     return NVTEVT_CONSUME;
 }
