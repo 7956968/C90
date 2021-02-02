@@ -3882,8 +3882,8 @@ static USERPROC_TRIG_PROC_VAL MovieExe_EthCam_PIP_DispCB(ISF_PORT *pPort, ISF_DA
 	UINT32 sensor_enable = System_GetEnableSensor();
 	UINT32 i, j, u32Mask;
 	//UINT32 i,  u32Mask;
-	APPDISP_VIEW_DRAW         pip_draw = {0};
-	APPDISP_VIEW_DRAW         *pdraw = &pip_draw;
+	APPDISP_VIEW_DRAW    pip_draw = {0};
+	APPDISP_VIEW_DRAW    *pdraw = &pip_draw;
 	ISF_RV ret;
 
 #if IMG_FULL_DISP
