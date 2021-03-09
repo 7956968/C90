@@ -390,7 +390,6 @@ INT32 System_OnBoot(VControl *pCtrl, UINT32 paramNum, UINT32 *paramArray)
 			//#NT#2016/03/02#Niven Cho -end
 		}
 #endif
-			
 
 	System_UpdateFWReboot();
 #if (AUDIO_FUNC == ENABLE )  
@@ -529,16 +528,16 @@ INT32 System_OnShutdown(VControl *pCtrl, UINT32 paramNum, UINT32 *paramArray)
 #if (SYSWDT_FUNC  ==  ENABLE)
 	 Sys_Wdt_Close();
 #endif
-   GxSystem_ShutdownNOW();
-   while(1);
+  // GxSystem_ShutdownNOW();
+   //while(1);
 //#MT#lyb -20200410 -end
 
 
 		//close last app mode
-	//	Ux_SendEvent(0, NVTEVT_SYSTEM_MODE, 1, SYS_MODE_UNKNOWN);
+		Ux_SendEvent(0, NVTEVT_SYSTEM_MODE, 1, SYS_MODE_UNKNOWN);
 
 		//register Project level Memory Provide API for Command Parser Interface
-	//	SxCmd_RegTempMemFunc(User_GetTempBuffer);
+		SxCmd_RegTempMemFunc(User_GetTempBuffer);
 
 #if _TODO //(IPCAM_FUNC == ENABLE)
 		if (UI_GetData(FL_WIFI_LINK) == WIFI_LINK_OK) {
@@ -569,7 +568,7 @@ INT32 System_OnShutdown(VControl *pCtrl, UINT32 paramNum, UINT32 *paramArray)
 		}
 
 #if (UI_FUNC == ENABLE)
-		Save_MenuInfo();
+		//Save_MenuInfo();
 #endif
 #if (BT_FUNC == ENABLE)
 		System_OnBTExit();
@@ -585,7 +584,7 @@ INT32 System_OnShutdown(VControl *pCtrl, UINT32 paramNum, UINT32 *paramArray)
 			//#NT#2016/03/07#KCHong -end
 #if (POWEROFFSOUND_FUNCTION == ENABLE)
 			//power off sound
-#if(UI_FUNC==ENABLE)
+#if 0//(UI_FUNC==ENABLE)
 			UISound_EnableKey(TRUE);
 			UISound_Play(DEMOSOUND_SOUND_POWERON_TONE);
 			Delay_DelayMs(500);

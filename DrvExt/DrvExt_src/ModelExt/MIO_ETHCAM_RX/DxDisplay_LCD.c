@@ -388,6 +388,7 @@ static void DrvLCD_TurnOn(void)
 	//IMPORTANT! for FAST BOOT, Photo App will ask disp size very early~
 	//Update size of first mode (before open)
 	//DxDisplay_UpdateModeInfo(g_LCDDout<<4, g_localMode, &g_localSize);
+	CHKPNT;
 
 	//LCD panel open
 	pDev->SEL.OPEN_DEVICE.DevID = DISPDEV_ID_PANEL;
@@ -399,14 +400,14 @@ static void DrvLCD_TurnOn(void)
 	//pDev->SEL.SET_ROTATE.Rot = DISPDEV_LCD_ROTATE_180;
 	//pObj->devCtrl(DISPDEV_SET_ROTATE,pDev);
 	//////////////////////////////////////////////////////////////////////
-
+	CHKPNT;
 	pObj->devCtrl(DISPDEV_GET_DISPSIZE, pDev);
 	g_localSize.w = pDev->SEL.GET_DISPSIZE.uiBufWidth;
 	g_localSize.h = pDev->SEL.GET_DISPSIZE.uiBufHeight;
 	if (pCurrentSize) {
 		pCurrentSize[0] = g_localSize;
 	}
-
+	CHKPNT;
 	g_LCDMode = g_localMode;
 }
 
@@ -529,7 +530,17 @@ static UINT32 DrvLCDState(UINT32 StateID, UINT32 Value) // General Properties
 			  GPIOMap_SetLCDBacklightBrightLevelSeamless((INT32)Value);
 
 			break;
+		case DRVDISP_STATE_DELAYOPEN:
+			//pDev->SEL.OPEN_DEVICE.DevID = DISPDEV_ID_PANEL;
+		CHKPNT;
+			//pObj->devCtrl(DISPDEV_GET_DISPSIZE, pDev);
+			CHKPNT;
+			//pObj->devCtrl(DISPDEV_OPEN_DEVICE, pDev);
+			break;
 		case DRVDISP_STATE_DIRECT:
+			//DrvLCDClose();
+			//Delay_DelayMs(100);
+			//DrvLCDOpen();
 			#if 0  //set direct by LCD driver!
 			if(pObj) {
 				//////////////////////////////////////////////////////////////////////
@@ -576,7 +587,9 @@ static UINT32 DrvLCDControl(UINT32 CtrlID, UINT32 Param1, UINT32 Param2)  // Gen
 {
 	DBG_FUNC_BEGIN("\r\n");
 	DBG_IND("ctrl %08x\r\n", CtrlID);
-
+	DBGD(CtrlID);
+	DBGD(Param1);
+	DBGD(Param2);
 	switch (CtrlID) {
 	case DRVDISP_CTRL_MODE: {
 			//DrvLCD_TurnOff();

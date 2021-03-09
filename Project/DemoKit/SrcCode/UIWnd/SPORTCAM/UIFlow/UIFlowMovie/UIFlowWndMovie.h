@@ -70,6 +70,8 @@ UIFlowWndMovie_Status_Icon0_ICON_TOP_AUDIO,
 UIFlowWndMovie_Status_Icon0_ICON_TOP_WIFI,
 UIFlowWndMovie_Status_Icon0_ICON_TOP_PARK,
 UIFlowWndMovie_Status_Icon0_ICON_TOP_2K,
+UIFlowWndMovie_Status_Icon0_ICON_TOP_AUDIO_OFF,
+UIFlowWndMovie_Status_Icon0_ICON_SOUND_REC_OFF,
 UIFlowWndMovie_Status_Icon0_MAX
 }UIFlowWndMovie_Status_Icon0_Setting;
 

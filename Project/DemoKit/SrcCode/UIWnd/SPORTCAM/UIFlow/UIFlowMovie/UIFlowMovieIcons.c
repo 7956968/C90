@@ -267,7 +267,8 @@ void FlowMovie_IconDrawTopState(void)
 
 	}else if ( UI_GetData(FL_MOVIE_AUDIO ) == MOVIE_AUDIO_OFF )
 	{
-		UxCtrl_SetShow(&UIFlowWndMovie_Status_Icon0Ctrl, FALSE);
+		UxState_SetData(&UIFlowWndMovie_Status_Icon0Ctrl, STATE_CURITEM, UIFlowWndMovie_Status_Icon0_ICON_TOP_AUDIO_OFF);
+		UxCtrl_SetShow(&UIFlowWndMovie_Status_Icon0Ctrl, TRUE);
 	}
 	
 	//WIFI 

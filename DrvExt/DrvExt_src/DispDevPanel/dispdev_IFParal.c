@@ -31,6 +31,7 @@ static void     dispdev_setIFParalIOCTRL(FP pIoCtrlFunc);
 static ER       dispdev_setDeviceRotate(DISPDEV_LCD_ROTATE Rot);
 static ER       dispdev_getLcdSize(PDISPDEV_GET_PRESIZE tLCDSize);
 
+void  self_init_lcd(void);
 
 
 /*
@@ -108,6 +109,8 @@ static void DispDeviceInit(tLCD_PARAM *pMode)
      - @b E_NOSPT:  Driver without supporting the specified LCD Mode.
      - @b E_OK:     LCD Open done and success.
 */
+tLCD_PARAM              *pCurMode      = NULL;
+
 static ER dispdev_openIFParal(void)
 {
 	UINT32                  i;
@@ -192,10 +195,10 @@ static ER dispdev_openIFParal(void)
 
 	// Config & Enable Display physical engine
 	dispdev_setDisplay(pDispDevControl, tLCD_INF_PARALLEL_16BITS, pMode, PinFuncID);
-
 	// Config & Enable display device
-	DispDeviceInit(pMode);
-
+	CHKPNT;
+	//DispDeviceInit(pMode);
+    pCurMode = pMode; 
 	dispanl_debug(("openIFParal Done\r\n"));
 
 #if 0
@@ -215,6 +218,7 @@ static ER dispdev_openIFParal(void)
 
 	return E_OK;
 }
+
 
 /*
     Close LCD display panel.
@@ -326,12 +330,22 @@ static void dispdev_writeLcdReg(UINT32 uiAddr, UINT32 uiValue)
 */
 static ER dispdev_getLcdSize(DISPDEV_GET_PRESIZE *tSize)
 {
+	CHKPNT;
+
 	UINT32                  i;
 	tLCD_PARAM              *pMode      = NULL;
 	tLCD_PARAM              *pConfigMode = NULL;
 	PINMUX_LCDINIT          LcdMode;
 	UINT32                  ModeNumber;
 	PINMUX_FUNC_ID          PinFuncID;
+	
+	//static BOOL First_open = FALSE;
+	//if(First_open == FALSE){
+	//	First_open = TRUE;
+	//}else{
+	//CHKPNT;
+	//	DispDeviceInit(pMode);
+	//}
 	//DISPDEV_IOCTRL_PARAM    DevIOCtrl;
 #if (DISPLCDSEL_IFPARAL_TYPE == DISPLCDSEL_IFPARAL_LCD1)
 	DISPDEV_IOCTRL          pDispDevControl = pIFParalIoControl1;
@@ -366,7 +380,7 @@ static ER dispdev_getLcdSize(DISPDEV_GET_PRESIZE *tSize)
 			}
 		}
 	}
-
+	CHKPNT;
 	if (pMode == NULL) {
 		DBG_ERR("LCDMode=%d not support\r\n", LcdMode);
 		return E_NOSPT;
@@ -491,4 +505,13 @@ PDISPDEV_OBJ dispdev_getLcd2DevObj(void)
 }
 
 #endif
+void  self_init_lcd(void)
+{
+	static BOOL bInitFirst = FALSE;
+	if(!bInitFirst)
+	{
+		bInitFirst = TRUE;
+		DispDeviceInit(pCurMode);
+	}
+}
 

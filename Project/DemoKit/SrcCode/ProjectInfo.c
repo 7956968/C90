@@ -35,6 +35,8 @@ char gFWExternalVersion[33] = FW_VERSION_NUM;
 #endif
 //#NT#2016/08/17#Niven Cho -end
 
+char gEthcamFWVersion[33];
+
 char *Prj_GetVersionString()
 {
 	return gFWExternalVersion;

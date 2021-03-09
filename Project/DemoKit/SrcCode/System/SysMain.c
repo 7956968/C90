@@ -396,8 +396,7 @@ void UserMainProc(void)
     } 
     else if(GxSystem_GetPowerOnSource() == GX_PWRON_SRC_PWR_VBUS)
     {
-    	    		System_SetGsensorPwrOn(TRUE); // CJ  2020 0426
-
+		System_SetGsensorPwrOn(TRUE); // CJ  2020 0426
         debug_msg("^Y================= Power ON source is VBus!!!================= \r\n");
     }
     else if(GxSystem_GetPowerOnSource() == GX_PWRON_SRC_PWR_SW)

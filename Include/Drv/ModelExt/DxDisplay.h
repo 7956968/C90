@@ -68,7 +68,7 @@ A 720x576 D-1 PAL image has a SAR of 720/576 = 5:4,
 #define DRVDISP_STATE_LASTMODE      7   //mode (R/O)
 #define DRVDISP_STATE_DIRECT        8   //control screen dir by LCD (W/O)
 #define DRVDISP_STATE_BRIGHTLVL_SEAMLESS  9 // cj 0716
-
+#define DRVDISP_STATE_DELAYOPEN  10 // zjf 210305
 //control id
 #define DRVDISP_CTRL_MODE           1   //mode control (for change mode)
 #define DRVDISP_CTRL_SLEEP          2   //sleep control (for enter/leave sleep mode)

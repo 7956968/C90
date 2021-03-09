@@ -2724,10 +2724,15 @@ void EthCam_TxIOStatus_CB(INT32 bEnd, void *output_data)
 	ETHCAM_XML_VALUE_RESULT *output=(ETHCAM_XML_VALUE_RESULT*)output_data;
 	DBG_DUMP("TxIOStatus cmd=%d, path_id=%d, status=%d, value=%d\r\n",output->cmd, output->path_id, output->status,output->value);
 }
+extern char gEthcamFWVersion[33];
 void EthCam_TxFWVersion_CB(INT32 bEnd, void *output_data)
 {
 	ETHCAM_XML_STRING_RESULT *output=(ETHCAM_XML_STRING_RESULT*)output_data;
 	DBG_DUMP("TxFWVersion cmd=%d, path_id=%d, status=%d, string=%s\r\n",output->cmd, output->path_id,output->status,output->string);
+	//get tx fwversion
+	memcpy(gEthcamFWVersion, output->string, 33);
+	//CHKPNT;
+	//debug_msg("ethcam version:%s\r\n",gEthcamFWVersion);
 }
 void EthCam_SetTxIPReset_CB(INT32 bEnd, void *output_data)
 {

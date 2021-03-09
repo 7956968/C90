@@ -781,7 +781,7 @@ void UI_DetCustom1Key(void)
     {
         debug_msg("Gsensor Triggered!!\r\n");
         iCustom1FilterCount = 0;
-        if(!System_GetGsensorPwrOn())
+        //if(!System_GetGsensorPwrOn())
 		if (UI_GetData(FL_MOVIE_CYCLIC_REC) == MOVIE_CYCLICREC_OFF)
 		{
 	        debug_msg("Gsensor off, do nothing!!\r\n");
@@ -1492,7 +1492,7 @@ void UI_DetUserFunc(void)
 				isOpenMsgWin = TRUE;
 				Ux_OpenWindow(&UIFlowWndWaitMomentCtrl, 1, UIFlowWndWaitMoment_StatusTXT_Msg_STRID_ENTER_SHUTDOWN);				
 			}
-	            if(uiAccPowerOffCount >= 15)
+	            /*if(uiAccPowerOffCount >= 15)
 	            {
 	                if((uiAccPowerOffCount % 5) == 0)// if power off interrupted, do it again every 5 seconds
 	                {
@@ -1507,7 +1507,13 @@ void UI_DetUserFunc(void)
 					Ux_CloseWindow(&UIFlowWndWaitMomentCtrl,0);
                 	Ux_PostEvent(NVTEVT_KEY_POWER_REL, 1, NVTEVT_KEY_RELEASE);
                 }
-            }
+               
+            }*/ 
+            if(uiAccPowerOffCount >= 3)
+	            {
+					Ux_CloseWindow(&UIFlowWndWaitMomentCtrl,0);
+                	Ux_PostEvent(NVTEVT_KEY_POWER_REL, 1, NVTEVT_KEY_RELEASE);
+                }
         }
     }else{  // if ACC On, Cancel Park poweroff time count;
       

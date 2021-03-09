@@ -787,6 +787,7 @@ static void _System_DetachDisplay(UINT32 DevID)
 	System_DisableVideo(id);
 	UI_DisableVideo(id);
 }
+extern 	void  self_init_lcd(void);
 static void _System_ShowDisplay(UINT32 DevID)
 {
 	//#NT#2016/03/07#KCHong -begin
@@ -2860,5 +2861,12 @@ void System_SetLCDBackLightLvlSeamless(UINT32 lvl)
     ((DX_OBJECT *)cDispDev)->pfState(DXSET|DRVDISP_STATE_BRIGHTLVL_SEAMLESS, lvl);
 }
 // cj 0716
-
+void SysVideo_ReopenLCD(void )
+{
+  
+  DX_HANDLE cDispDev = 0;
+  
+  cDispDev = Dx_GetObject(DX_CLASS_DISPLAY_EXT|DX_TYPE_LCD); 
+    ((DX_OBJECT *)cDispDev)->pfState(DXSET|10, 0);
+}
 #endif

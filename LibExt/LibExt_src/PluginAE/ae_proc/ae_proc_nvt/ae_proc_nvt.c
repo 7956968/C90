@@ -338,6 +338,7 @@ UINT32 GetEV(void)
 
 	return EV_VALUE;
 }
+void SetEV(UINT32   ev);
 void SetEV(UINT32   ev)
 {
 	EV_VALUE = ev;
@@ -350,7 +351,7 @@ extern void AWB_GetColorGain(UINT32 id, UINT32 *Rg, UINT32 *Gg, UINT32 *Bg);
 extern void H264Test_GetEncInfo(INT32 puiParam[8]);
 static void AE_SetMovieLog(UINT32 Id, char *Buf, UINT32 BufLen)
 {
-	INT32 uiParam[8];
+	//INT32 uiParam[8];
 	UINT32 RGain, GGain, BGain, g3dnr;
 	//H264Test_GetEncInfo(uiParam);
 	AWB_GetColorGain(Id, &RGain, &GGain, &BGain);

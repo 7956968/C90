@@ -59,7 +59,7 @@
 // FW version and name
 #define FW_UPDATE_NAME                  "A:\\FW98515Z.bin"
 #define FW_VERSION_RELEASE              DISABLE //ENABLE
-#define FW_VERSION_NUM                  "REGULAR_0201_001"
+#define FW_VERSION_NUM                  "REGULAR_0308_001"
 
 //..............................................................................
 /**

@@ -11,9 +11,13 @@ extern VControl UIMenuSetupVersion_Static_TitleCtrl;//Static type
 
 extern VControl UIMenuSetupVersion_Static_VerCtrl;//Static type 
 
+extern VControl UIMenuSetupVersion_Static_EthVerCtrl;//Static type 
+
 extern VControl UIMenuSetupVersion_Static_SNCtrl;//Static type 
 
 extern VControl UIMenuWndSetupVersion_Static_VerTxtCtrl;//Static type 
+
+extern VControl UIMenuWndSetupVersion_Static_EthVerTxtCtrl;//Static type 
 
 extern VControl UIMenuWndSetupVersion_Static_SNTxtCtrl;//Static type 
 

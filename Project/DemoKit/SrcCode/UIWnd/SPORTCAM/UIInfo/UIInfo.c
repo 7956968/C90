@@ -665,7 +665,9 @@ void SysCheckFlag(void)
 	SysLimitFlag(FL_MOVIE_SBS_MODE,   0,  MOVIE_SBS_ID_MAX,       DEFAULT_MOVIE_SBS_MODE);
 	//#NT#2017/03/03#Jeah Yen -end
 	SysLimitFlag(FL_MOVIE_CODEC,   0,  MOVIE_CODEC_ID_MAX,     DEFAULT_MOVIE_CODEC);
-	SysLimitFlag(FL_SENSOR1_DISP_OFFSET,   0,  SEN_DISP_OFFSET_SETTING_MAX,	   DEFAULT_SENSOR_1_DISP_OFFSET);
+	//SysLimitFlag(FL_SENSOR1_DISP_OFFSET,   0,  SEN_DISP_OFFSET_SETTING_MAX,	   DEFAULT_SENSOR_1_DISP_OFFSET);
+	//zjf add 210305
+	SysLimitFlag(FL_SENSOR1_DISP_OFFSET,   0,  IMG_DISP_POS_MAX,    DEFAULT_SENSOR_1_DISP_OFFSET);
 	SysLimitFlag(FL_SENSOR2_DISP_OFFSET,   0,  SEN_DISP_OFFSET_SETTING_MAX,	   DEFAULT_SENSOR_1_DISP_OFFSET);
 	// Playback
 	SysLimitFlag(FL_PROTECT,            0,  FILE_PROTECT_ID_MAX,    DEFAULT_PROTECT);
@@ -1366,7 +1368,6 @@ void System_UpdateTx(void)
                    TESTLOG("txupdate finish ");
                     bTxUpdateOK = TRUE;
 					Ux_OpenWindow(&UIFlowWndWaitMomentCtrl, 1,UIFlowWndWaitMoment_StatusTXT_Msg_STRID_ETHCAM_UDFW_FINISH);
-					return NVTEVT_CONSUME;
                 }else{
 					TESTLOG("txupdate no file "); //MT CJ 2020/420
                 }

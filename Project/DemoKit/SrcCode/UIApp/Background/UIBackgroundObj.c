@@ -1867,7 +1867,7 @@ static UINT32 BackgroundEthCamFWUpdate(void)
 	EthCamSocketCli_SetCmdSendSizeCB(ETHCAM_PATH_ID_1, (UINT32)&socketCliEthCmd_SendSizeCB);
 	EthCam_SendXMLCmd(ETHCAM_PATH_ID_1, ETHCAM_PORT_DEFAULT ,ETHCAM_CMD_TX_FWUPDATE_FWSEND, uiFwSize);
 	EthCamCmdRET=EthCam_SendXMLData(ETHCAM_PATH_ID_1, (UINT8 *)uiFwAddr, uiFwSize);
-	EthCamSocketCli_SetCmdSendSizeCB(ETHCAM_PATH_ID_1, 0);	
+	EthCamSocketCli_SetCmdSendSizeCB(ETHCAM_PATH_ID_1, 0);
 	
 	if(EthCamCmdRET==ETHCAM_RET_OK){
         bRet = NVTRET_OK;

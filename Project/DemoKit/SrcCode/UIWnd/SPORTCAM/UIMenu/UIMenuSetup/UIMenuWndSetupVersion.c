@@ -9,6 +9,7 @@
 //#include "UIMenuWndSetupLoaderVersion.h"
 #include "MenuCommonItem.h"
 #include "UIFlow.h"
+#include "EthCamAppCmd.h"
 
 #define LD_VERSION_DISPLAY      ENABLE//DISABLE
 
@@ -16,8 +17,10 @@
 CTRL_LIST_BEGIN(UIMenuWndSetupVersion)
 CTRL_LIST_ITEM(UIMenuSetupVersion_Static_Title)
 CTRL_LIST_ITEM(UIMenuSetupVersion_Static_Ver)
+CTRL_LIST_ITEM(UIMenuSetupVersion_Static_EthVer)
 CTRL_LIST_ITEM(UIMenuSetupVersion_Static_SN)
 CTRL_LIST_ITEM(UIMenuWndSetupVersion_Static_VerTxt)
+CTRL_LIST_ITEM(UIMenuWndSetupVersion_Static_EthVerTxt)
 CTRL_LIST_ITEM(UIMenuWndSetupVersion_Static_SNTxt)
 CTRL_LIST_ITEM(UIMenuWndSetupVersion_Panel_Operate)
 CTRL_LIST_END
@@ -41,12 +44,16 @@ EVENT_ITEM(NVTEVT_KEY_MENU, UIMenuWndSetupVersion_OnKeyMenu)
 EVENT_ITEM(NVTEVT_KEY_MODE, UIMenuWndSetupVersion_OnKeyMode)
 EVENT_ITEM(NVTEVT_KEY_SHUTTER2, UIMenuWndSetupVersion_OnKeyShutter2)
 EVENT_END
-
+extern char gEthcamFWVersion[33];
 INT32 UIMenuWndSetupVersion_OnOpen(VControl *pCtrl, UINT32 paramNum, UINT32 *paramArray)
 {
 //currentInfo.
+	EthCam_SendXMLCmd(0, ETHCAM_PORT_DEFAULT ,ETHCAM_CMD_TX_FW_VERSION, 0);
 	UxStatic_SetData(&UIMenuWndSetupVersion_Static_VerTxtCtrl, STATIC_VALUE, Txt_Pointer(Prj_GetVersionString()));
 	UxStatic_SetData(&UIMenuWndSetupVersion_Static_SNTxtCtrl, STATIC_VALUE, Txt_Pointer(Prj_GetVersionString()));
+	debug_msg("ethcam version:%s\r\n",gEthcamFWVersion);
+	debug_msg("ethcam version:%s\r\n",gEthcamFWVersion);
+	UxStatic_SetData(&UIMenuWndSetupVersion_Static_EthVerTxtCtrl, STATIC_VALUE, Txt_Pointer(gEthcamFWVersion));
 	Ux_DefaultEvent(pCtrl, NVTEVT_OPEN_WINDOW, paramNum, paramArray);
 	return NVTEVT_CONSUME;
 }
@@ -102,12 +109,20 @@ EVENT_END
 EVENT_BEGIN(UIMenuSetupVersion_Static_Ver)
 EVENT_END
 
+//----------------------UIMenuSetupVersion_Static_EthVerCtrl Event---------------------------
+EVENT_BEGIN(UIMenuSetupVersion_Static_EthVer)
+EVENT_END
+
 //----------------------UIMenuSetupVersion_Static_SNCtrl Event---------------------------
 EVENT_BEGIN(UIMenuSetupVersion_Static_SN)
 EVENT_END
 
 //----------------------UIMenuWndSetupVersion_Static_VerTxtCtrl Event---------------------------
 EVENT_BEGIN(UIMenuWndSetupVersion_Static_VerTxt)
+EVENT_END
+
+//----------------------UIMenuWndSetupVersion_Static_EthVerTxtCtrl Event---------------------------
+EVENT_BEGIN(UIMenuWndSetupVersion_Static_EthVerTxt)
 EVENT_END
 
 //----------------------UIMenuWndSetupVersion_Static_SNTxtCtrl Event---------------------------

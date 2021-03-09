@@ -876,9 +876,9 @@ UINT32 bDetEthcamUpdateCount = 0;
 #if(Auto_Reboot_PIP_TestFunc == ENABLE)
 	BOOL Ethcam_Reboot_PipTest = FALSE;
 #endif
+extern void self_init_lcd(void);
 INT32 UIFlowWndMovie_OnOpen(VControl *pCtrl, UINT32 paramNum, UINT32 *paramArray)
 {
-
 debug_msg("--------------UIFlowWndMovie_OnOpen CJ --------------%d \r\n" ,UI_GetData( FL_MOVIE_SIZE ));
 
 	g_uiRecStopTimerCnt=0;
@@ -929,7 +929,7 @@ debug_msg("--------------UIFlowWndMovie_OnOpen CJ --------------%d \r\n" ,UI_Get
 		}
 		#endif
 	}
-
+	self_init_lcd();
 	if (System_GetState(SYS_STATE_POWERON) == SYSTEM_POWERON_SAFE) {
 		if (System_GetState(SYS_STATE_CARD)  == CARD_REMOVED) {
 			CHKPNT;
@@ -949,7 +949,6 @@ debug_msg("--------------UIFlowWndMovie_OnOpen CJ --------------%d \r\n" ,UI_Get
 			return NVTEVT_CONSUME;
 		}
 	}
-
 	if (System_GetState(SYS_STATE_POWERON) == SYSTEM_POWERON_SAFE) {
 		#if USE_FILEDB
 		if (UI_GetData(FL_IsUseFileDB)) {
@@ -2471,6 +2470,12 @@ INT32 UIFlowWndMovie_OnTimer(VControl *pCtrl, UINT32 paramNum, UINT32 *paramArra
 
 	case NVTEVT_1SEC_TIMER:
 
+		//debug_msg("%x\r\n",123);
+		//debug_msg("%X\r\n",123);
+		//debug_msg("%0X\r\n",123);
+		//debug_msg("%05X\r\n",123);
+		//debug_msg("%-5d\r\n",123);
+		//debug_msg("%-5d\r\n",123);
 #if(Ethcam_PIPTestFunc == ENABLE)
 		if(Ethcam_PipTest){
 			if(Ethcam_PipTestCnt < 3){
@@ -2837,7 +2842,7 @@ CHKPNT;
 		if(iLCA_DisCntM != -1)
 		{
             iLCA_DisCntM++;
-			if(iLCA_DisCntM == (5000 / TIMER_LCA_SEC)) {	// 5s per cycle
+			if(iLCA_DisCntM == (2000 / TIMER_LCA_SEC)) {	// 5s per cycle
 				iLCA_CarStopCnt++;
 				if(iLCA_CarStopCnt == 2)
 				{
@@ -2853,7 +2858,7 @@ CHKPNT;
         	//iLCA_CarStopCnt=0;
         	//iLCA_CarStopsta=0;
             iLCA_DisCntR++;
-            if(iLCA_DisCntR == (5000 / TIMER_LCA_SEC)) {
+            if(iLCA_DisCntR == (2000 / TIMER_LCA_SEC)) {
                 iLCA_DisCntR = -1;
                 UxCtrl_SetShow(&UIFlowWndMovie_Status_Alarm_RCtrl, FALSE);
             }
@@ -2873,7 +2878,7 @@ CHKPNT;
                 ||(uiLCA_Alarm_level_Right == USER_AVLCA_WRN_LEVEL_L)
                 ||(uiLCA_Alarm_level_Mid == USER_AVLCA_WRN_LEVEL_L))
             {
-            	if((iLCA_VoiceCnt % (1000 / TIMER_LCA_SEC)) == 0)
+            	if((iLCA_VoiceCnt % (1600 / TIMER_LCA_SEC)) == 0)
         		{
                 	GxSound_Play(DEMOSOUND_SOUND_KEY_TONE);
             	}
@@ -2881,7 +2886,7 @@ CHKPNT;
                 ||(uiLCA_Alarm_level_Right == USER_AVLCA_WRN_LEVEL_H)
                 ||(uiLCA_Alarm_level_Mid == USER_AVLCA_WRN_LEVEL_H))
             {
-            	if((iLCA_VoiceCnt % (500 / TIMER_LCA_SEC)) == 0)	//0.5s
+            	if((iLCA_VoiceCnt % (1000 / TIMER_LCA_SEC)) == 0)	//0.8s
         		{
                		GxSound_Play(DEMOSOUND_SOUND_KEY_TONE);
             	}
@@ -4283,16 +4288,18 @@ INT32 UIFlowWndMovie_BTN_PIP_OnTouchPanelClick(VControl *pCtrl, UINT32 paramNum,
 	debug_msg("EthCamNet_GetEthLinkStatus: %d \r\n",EthCamNet_GetEthLinkStatus(0));
  	DBGD(bFocusBackLightAdj);
 	if(!bFocusBackLightAdj) {
-		if(EthCamNet_GetEthLinkStatus(0) == ETHCAM_LINK_UP) {
-			if(SysGetFlag(FL_DUAL_CAM) == DUALCAM_FRONT  ) {
-				CHKPNT;
+		if(SysGetFlag(FL_DUAL_CAM) == DUALCAM_FRONT  ) {
+			CHKPNT;
+			if((bflag_EthLinkFinish == TRUE && socketCliEthData1_IsRecv(ETHCAM_PATH_ID_1))){
+				SysSetFlag(FL_DUAL_CAM_MENU, DUALCAM_BEHIND);
 				SysSetFlag(FL_DUAL_CAM,DUALCAM_BEHIND);
-			}else {
-				SysSetFlag(FL_DUAL_CAM,DUALCAM_FRONT);
+			}else{
+				CloseTimer();
+				Ux_OpenWindow(&UIFlowWndWaitMomentCtrl, 1, UIFlowWndWaitMoment_StatusTXT_Msg_STRID_ETHCAM_DETFAIL);
 			}
-		}else{
-			CloseTimer();
-			Ux_OpenWindow(&UIFlowWndWaitMomentCtrl, 1, UIFlowWndWaitMoment_StatusTXT_Msg_STRID_ETHCAM_DETFAIL);
+		}else {
+			SysSetFlag(FL_DUAL_CAM_MENU, DUALCAM_FRONT);
+			SysSetFlag(FL_DUAL_CAM,DUALCAM_FRONT);
 		}
 	}
   //      Ux_PostEvent(NVTEVT_KEY_SELECT, 1, NVTEVT_KEY_PRESS);
