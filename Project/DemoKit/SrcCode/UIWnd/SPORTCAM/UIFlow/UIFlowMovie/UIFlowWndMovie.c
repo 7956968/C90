@@ -919,7 +919,13 @@ debug_msg("--------------UIFlowWndMovie_OnOpen CJ --------------%d \r\n" ,UI_Get
 
 	//System_OnStrg_TxFirmware();//check again
 	
+	SetBLStatus(FALSE);
 	UIFlowWndMovie_Initparam();
+	Delay_DelayMs(50);
+	self_init_lcd();
+	Delay_DelayMs(200);
+	SetBLStatus(TRUE);
+
 	debug_msg( "--cj SYS_STATE_POWERON:%d %d \r\n",System_GetState(SYS_STATE_POWERON), UIStorageCheck(STORAGE_CHECK_ERROR, NULL));
 	if (System_GetState(SYS_STATE_POWERON) == SYSTEM_POWERON_SAFE) {				
 		#if(ONVIF_PROFILE_S!=ENABLE) //No File System	
@@ -929,7 +935,7 @@ debug_msg("--------------UIFlowWndMovie_OnOpen CJ --------------%d \r\n" ,UI_Get
 		}
 		#endif
 	}
-	self_init_lcd();
+	//self_init_lcd(); //0309
 	if (System_GetState(SYS_STATE_POWERON) == SYSTEM_POWERON_SAFE) {
 		if (System_GetState(SYS_STATE_CARD)  == CARD_REMOVED) {
 			CHKPNT;
