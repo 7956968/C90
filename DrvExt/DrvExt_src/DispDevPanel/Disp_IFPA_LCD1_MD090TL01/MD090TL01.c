@@ -1084,16 +1084,12 @@ void dispdev_writeToLcdGpioParal(DISPDEV_IOCTRL pDispDevControl, UINT32 addr, UI
    #else
    if(g_bPa2DsiI2cInit == FALSE)
    {
-	   Delay_DelayMs(10);
-	   //System_LCDTurnOn();
-	   gpio_setPin(P_GPIO_9);
-	   Delay_DelayMs(10);
 	   gpio_clearPin(P_GPIO_9);
 	   gpio_clearPin(P_GPIO_17);
-	   Delay_DelayMs(100);
+	   Delay_DelayMs(5);
 	   gpio_setPin(P_GPIO_9);
 	   gpio_setPin(P_GPIO_17);
-	   Delay_DelayMs(10);
+	   Delay_DelayMs(1);
      PA2DSI_INFO PA2DSIInfo;
      PA2DSIInfo.I2C_PinMux = I2C_PINMUX_1ST;
      PA2DSIInfo.I2C_BusClock = I2C_BUS_CLOCK_200KHZ;
@@ -1103,16 +1099,12 @@ void dispdev_writeToLcdGpioParal(DISPDEV_IOCTRL pDispDevControl, UINT32 addr, UI
      {
         debug_msg("^GLiwk--------- PA2DSI Initial Success!!\r\n");
         g_bPa2DsiI2cInit = TRUE;
-		Delay_DelayMs(10);
-		//System_LCDTurnOn();
-		gpio_setPin(P_GPIO_9);
-		Delay_DelayMs(10);
 		gpio_clearPin(P_GPIO_9);
 		gpio_clearPin(P_GPIO_17);
-		Delay_DelayMs(100);
+		Delay_DelayMs(5);
 		gpio_setPin(P_GPIO_9);
 		gpio_setPin(P_GPIO_17);
-		Delay_DelayMs(10);
+		Delay_DelayMs(1);
      }
    }
    if(g_bPa2DsiI2cInit)
